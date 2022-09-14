@@ -111,7 +111,6 @@ def manyTimes(myTroops, enemyPath):
     aveCountriesConquered = round(totalCountriesConquered/trials)
 
     #Prints associated results
-    print()
     print("\nProbability of success:", winProbability, "\n")
     print("Average troop loss given a win:", aveTroopsLost, "\n")
     print("Average big troop count given a win:", troopsAtEnd, "\n")
