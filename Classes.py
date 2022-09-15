@@ -377,8 +377,22 @@ def main():
         name = input("What is the name of player " (i+1), "? ")
         players.append(Player(name, []))
 
+    ## Gives each player a set of countries
     for i in range(len(board)):
-        ## Need to run through player list multiple times
+        country = board[i]
+        index = i % numOfPlayers
+        player = players[index]
+        country.setPlayerName(player.getName())
+        player.addCountry(country)
+
+    for i in range(len(players)):
+
+        
+
+
+        ## troopCount - player.getNumOfTroops().....
+        
+            
         
 
         
