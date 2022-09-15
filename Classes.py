@@ -5,9 +5,6 @@ import random
 board = []
 
 #List of Players
-
-board = []
-
 players = []
 
 
@@ -44,8 +41,6 @@ class Player:
 
 
     #Removes country from players list
-
-
     def removeCountry(self, country):
         if country in self.__occupied:
             self.__occupied.remove(country)
@@ -115,7 +110,7 @@ class Player:
     def __str__(self):
         countriesStr = ""
         for country in self.__occupied:
-            name = country[0].getName()
+            name = country.getName()
             troops = str(country.getNumOfTroops())
             countriesStr = countriesStr + "\t" + name + ": " + troops + "\n"
         return"Player: %s \nNumber: %s \nCountries occupied: \n%s" % \
@@ -157,6 +152,9 @@ class Country:
 
     def setNumOfTroops(self, numOfTroops):
         self.__numOfTroops = numOfTroops
+
+    def addTroop(self):
+        self.__numOfTroops += 1    
 
 
 
@@ -374,7 +372,8 @@ def main():
 
     ## Initialize Players
     for i in range(numOfPlayers):
-        name = input("What is the name of player " (i+1), "? ")
+        playerNumber = str(i+1)
+        name = input("What is the name of player " + playerNumber + "? ")
         players.append(Player(name, []))
 
     ## Gives each player a set of countries
@@ -385,17 +384,26 @@ def main():
         country.setPlayerName(player.getName())
         player.addCountry(country)
 
+    ## Adds remaining troops to each players' countries
     for i in range(len(players)):
+        player = players[i]
+        remaining = troopCount - player.getTotalTroops()
+        countries = player.getCountriesOccupied()
+        numOfCountries = len(countries)
+        for j in range(remaining):
+            index = random.randint(0,(numOfCountries - 1))
+            countries[index].addTroop()
 
-        
+    for i in range(len(players)):   
+        print(players[i])
 
+    for i in range(4):
+        print(board[i])
 
-        ## troopCount - player.getNumOfTroops().....
-        
             
         
 
-        
+main()    
 
 
 
