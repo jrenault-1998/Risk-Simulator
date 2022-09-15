@@ -1,4 +1,10 @@
+import math
+import random
+
+## List of Countries
 board = []
+
+#List of Players
 players = []
 
 
@@ -6,7 +12,8 @@ players = []
 class Player:
     # Class variables
     NextNumber = 1
-    
+
+    #Initializes a Player
     def __init__(self, name="N/A", occupied=[]):
         
         self.__name = name
@@ -29,10 +36,12 @@ class Player:
             totalTroops += country.getNumOfTroops()
         return totalTroops
 
+    #Removes country from players list
     def removeCountry(self, country):
         if country in self.__occupied:
             self.__occupied.remove(country)
 
+    #Adds country to players list
     def addCountry(self, country):
         self.__occupied.append(country)
 
@@ -82,7 +91,7 @@ class Player:
         
             
 
-##    GOAL    
+##    Displays    
 ## Player: Josh
 ## Number: 1
 ## Countries occupied:
@@ -95,15 +104,16 @@ class Player:
         countriesStr = ""
         for country in self.__occupied:
             name = country[0].getName()
-            troops = str(country[1])
+            troops = str(country.getNumOfTroops())
             countriesStr = countriesStr + "\t" + name + ": " + troops + "\n"
         return"Player: %s \nNumber: %s \nCountries occupied: \n%s" % \
                (self.__name, self.__number, countriesStr)
 
 
-               
+#Country consists of a name, a player name, nuber of troops, a continent and a list of nearby countries              
 class Country:
-    
+
+    #Initializes a Country
     def __init__(self, name="N/A", playerName="N/A", troops=0, continent="N/A", \
                  nearbyCountryNames=[]):
         
@@ -136,7 +146,7 @@ class Country:
         self.__numOfTroops = numOfTroops
 
 
-##    GOAL    
+##    Displays    
 ## Country: Brazil
 ## Ruler's Name: Josh
 ## Troops Occupying: 5
@@ -227,12 +237,6 @@ def whoWins(myTroops, enemyTroops):
     
     return finalResult ##Final troop counts [myTroops, enemyTroops, Boolean]
 
-def playerInitializer():
-    player1 = Player("Josh", [])
-    player2 = Player("Player2", [])
-    
-    players.append(player1)
-    players.append(player2)
 
 
 def boardInitializer():    
@@ -336,12 +340,31 @@ def boardInitializer():
 
 
 
-boardInitializer()
-playerInitializer()
 
+def main():
+    boardInitializer()
+    random.shuffle(board)
+    numOfPlayers = int(input("How many players? (3-6 players allowed): "))
+    
+    ## 6 players = 20 troops
+    ## 5 players = 25
+    ## 4 players = 30
+    ## 3 players = 35
+    if numOfPlayers in range(3,7):
+        troopCount = 50 - 5*numOfPlayers
+    else:
+        return("Please pick a reasonable number of players")    ## Need to re-ask the question
 
+    ## Initialize Players
+    for i in range(numOfPlayers):
+        name = input("What is the name of player " (i+1), "? ")
+        players.append(Player(name, []))
 
+    for i in range(len(board)):
+        ## Need to run through player list multiple times
+        
 
+        
 
 
 
