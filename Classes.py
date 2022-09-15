@@ -1,4 +1,8 @@
-#A player consists of a name, colour and a list of countries with associated troop counts (ex. [[Country0, troopCount], [Country1, 1],...])
+board = []
+players = []
+
+
+#A player consists of a name, colour and a list of countries 
 class Player:
   
     def __init__(self, name="N/A", colour="N/A", \
@@ -20,8 +24,57 @@ class Player:
     def getTotalTroops(self):
         totalTroops = 0
         for country in self.__occupied:
-            totalTroops += country[1]
+            totalTroops += country.getNumOfTroops()
         return totalTroops
+
+    def removeCountry(self, country):
+        if country in self.__occupied:
+            self.__occupied.remove(country)
+
+    def addCountry(self, country):
+        self.__occupied.append(country)
+
+    def attackCountry(self, startCountry):
+        options = startCountry.getNearbyCountryNames
+        print("Here are your options: ", options)
+        defender = input("Who are you attacking? ")
+        
+        for country in board:
+            if country.getName() == defender:
+                myTroops = startCountry.getNumOfTroops()
+                enemyTroops = country.getNumOfTroops()
+                result = whoWins(myTroops, enemyTroops)
+                if result[2]: ##Attacker wins
+
+                    ## Add country to our list
+                    self.addCountry(country)
+                    
+                    ## Remove country from defender's list
+                    for player in players:
+                        if defender == player.getName():
+                            player.removeCountry(country)
+                            break
+
+                    ## Add new owner to country
+                    country.setPlayerName(startCountry.getPlayerName())
+
+                    # Move associated troops
+                    if myTroops <= 4:
+                        country.setNumOfTroops(result[0] - 1)
+                    else =:
+                        options = [3:result[0] - 1]
+                        move = int(input("How many troops do you want to move? (", options, ")"))
+                        if move in options:
+                            country.setNumOfTroops(move)
+                            startCountry.setNumOfTroops(result[0] - move)
+                        else:
+                            return("Error!!!! You need to pick an appropriate number of troops")  #Want this to ask the question again
+
+
+                else: ##Defender wins
+                    
+                break
+            
 
 ##    GOAL    
 ## Player: Josh
@@ -70,6 +123,12 @@ class Country:
     def getNumOfTroops(self):
         return self.__numOfTroops
 
+    def setPlayerName(self, playerName):
+        self.__playerName = playerName
+
+    def setNumOfTroops(self, numOfTroops):
+        self.__numOfTroops = numOfTroops
+
 
 ##    GOAL    
 ## Country: Brazil
@@ -89,8 +148,82 @@ class Country:
             nearbyStr = nearbyStr + "\t" + nearby + "\n"
         return"Country: %s \nRuler's Name: %s \nTroops Occupying: %d \nContinent: %s \nNearby Countries: \n%s" \
                % (self.__name, self.__playerName, self.__numOfTroops, self.__continent, nearbyStr)
-def main():    
-    ##Countries
+
+## Takes in the enemy and our troop counts and returns list of final troop counts [myTroops, enemyTroops, Boolean]
+def whoWins(myTroops, enemyTroops):
+
+
+    while enemyTroops > 0 and myTroops > 1:
+        d1 = random.randint(1,6)
+        d2 = random.randint(1,6)
+        d3 = random.randint(1,6)
+        d4 = random.randint(1,6)
+        d5 = random.randint(1,6)
+        myDice = [d1, d2, d3]
+        myDice.sort(reverse=True)
+        myTwoDice = [d1, d2]
+        myTwoDice.sort(reverse=True)
+        enemyDice = [d4, d5]
+        enemyDice.sort(reverse=True)
+
+        if myTroops > 3:
+            if enemyTroops > 1:
+                if myDice[0] > enemyDice[0]:
+                    enemyTroops -= 1
+                else:
+                    myTroops -= 1
+                    
+                if myDice[1] > enemyDice[1]:
+                    enemyTroops -= 1
+                else:
+                    myTroops -= 1
+            else:
+                if myDice[0] > d4:
+                    enemyTroops -= 1
+                else:
+                    myTroops -= 1
+        elif myTroops == 3:
+            if enemyTroops > 1:
+                if myTwoDice[0] > enemyDice[0]:
+                    enemyTroops -= 1
+                else:
+                    myTroops -= 1
+                if myTwoDice[1] > enemyDice[1]:
+                    enemyTroops -= 1
+                else:
+                    myTroops -= 1
+            else:
+                if myTwoDice[0] > d4:
+                    enemyTroops -= 1
+                else:
+                    myTroops -= 1
+        elif myTroops == 2:
+            if enemyTroops > 1:
+                if d1 > enemyDice[0]:
+                    enemyTroops -= 1
+                else:
+                    myTroops -= 1
+            else:
+                if d1 > d4:
+                    enemyTroops -= 1
+                else:
+                    myTroops -= 1
+        else:
+            return ("IDK what happened, I thought we checked all the cases!!!")
+        
+    finalResult = [myTroops, enemyTroops]
+    ## True if myTroops won
+    if enemyTroops == 0:
+        finalResult[0] -= 1
+        finalResult.append(True)
+    else:
+        finalResult.append(False)
+    
+    return finalResult ##Final troop counts [myTroops, enemyTroops, Boolean]
+
+
+def boardInitializer():    
+    ##Country variables are created
     brazil = Country("Brazil", "", 1, "South America", ["Argentina", "North Africa", "Peru", "Venezuela"])
     venezuela = Country("Venezuela", "", 1, "South America", ["Central America", "Brazil", "Peru"])
     peru = Country("Peru", "", 1, "South America", ["Argentina", "Brazil", "Venezuela"])
@@ -138,8 +271,65 @@ def main():
     congo = Country("Congo", "", 1, "Africa", ["East Africa", "South Africa", "North Africa"])
     southAfrica = Country("South Africa", "", 1, "Africa", ["East Africa", "Congo",  "Madagascar"])
     madagascar = Country("Madagascar", "", 1, "Africa", ["South Africa", "East Africa"])
-
-    print(alberta)
     
+    ##Country objects are inserted into a list which is the "board"
+    board.append(brazil)
+    board.append(venezuela)
+    board.append(peru)
+    board.append(argentina)
+    
+    board.append(centralAmerica)
+    board.append(westernUS)
+    board.append(easternUS)
+    board.append(quebec)
+    board.append(ontario)
+    board.append(alberta)
+    board.append(greenland)
+    board.append(northwestTerritory)
+    board.append(alaska)
+    
+    board.append(kamchatka)
+    board.append(yakutsk)
+    board.append(irkutsk)
+    board.append(siberia)
+    board.append(mongolia)
+    board.append(china)
+    board.append(japan)
+    board.append(ural)
+    board.append(afghanistan)
+    board.append(siam)
+    board.append(india)
+    board.append(middleEast)
+    
+    board.append(indonesia)
+    board.append(westernAustralia)
+    board.append(easternAustralia)
+    board.append(newGuinea)
+    
+    board.append(ukraine)
+    board.append(northernEurope)
+    board.append(southernEurope)
+    board.append(westernEurope)
+    board.append(greatBritain)
+    board.append(iceland)
+    board.append(scandinavia)
+    
+    board.append(egypt)
+    board.append(northAfrica)
+    board.append(eastAfrica)
+    board.append(congo)
+    board.append(southAfrica)
+    board.append(madagascar)
 
-main()
+
+
+boardInitializer()
+
+
+
+
+
+
+
+
+
