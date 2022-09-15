@@ -5,6 +5,9 @@ import random
 board = []
 
 #List of Players
+
+board = []
+
 players = []
 
 
@@ -13,7 +16,10 @@ class Player:
     # Class variables
     NextNumber = 1
 
+
     #Initializes a Player
+
+
     def __init__(self, name="N/A", occupied=[]):
         
         self.__name = name
@@ -36,12 +42,17 @@ class Player:
             totalTroops += country.getNumOfTroops()
         return totalTroops
 
+
     #Removes country from players list
+
+
     def removeCountry(self, country):
         if country in self.__occupied:
             self.__occupied.remove(country)
 
+
     #Adds country to players list
+
     def addCountry(self, country):
         self.__occupied.append(country)
 
@@ -91,6 +102,7 @@ class Player:
         
             
 
+
 ##    Displays    
 ## Player: Josh
 ## Number: 1
@@ -110,10 +122,11 @@ class Player:
                (self.__name, self.__number, countriesStr)
 
 
+
 #Country consists of a name, a player name, nuber of troops, a continent and a list of nearby countries              
+               
 class Country:
 
-    #Initializes a Country
     def __init__(self, name="N/A", playerName="N/A", troops=0, continent="N/A", \
                  nearbyCountryNames=[]):
         
@@ -146,7 +159,9 @@ class Country:
         self.__numOfTroops = numOfTroops
 
 
+
 ##    Displays    
+
 ## Country: Brazil
 ## Ruler's Name: Josh
 ## Troops Occupying: 5
@@ -236,6 +251,7 @@ def whoWins(myTroops, enemyTroops):
         finalResult.append(False)
     
     return finalResult ##Final troop counts [myTroops, enemyTroops, Boolean]
+
 
 
 
@@ -337,6 +353,7 @@ def boardInitializer():
     board.append(congo)
     board.append(southAfrica)
     board.append(madagascar)
+
 
 
 

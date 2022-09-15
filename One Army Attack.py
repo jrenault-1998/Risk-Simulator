@@ -111,7 +111,7 @@ def manyTimes(myTroops, enemyPath):
     aveCountriesConquered = round(totalCountriesConquered/trials)
 
     #Prints associated results
-    print("Probability of success:", winProbability, "\n")
+    print("\nProbability of success:", winProbability, "\n")
     print("Average troop loss given a win:", aveTroopsLost, "\n")
     print("Average big troop count given a win:", troopsAtEnd, "\n")
     print("Average countries conquered:", aveCountriesConquered, "\n")
@@ -125,7 +125,7 @@ def main():
     enemyPathStr = enemyPathStr.split(',')
     for i in enemyPathStr:
         enemyPath.append(int(i))
-    myTroops = int(input("\nHow many of our troops are going into this battle?"))
+    myTroops = int(input("\nHow many of our troops are going into this battle? "))
     manyTimes(myTroops, enemyPath)
 
 main()    
