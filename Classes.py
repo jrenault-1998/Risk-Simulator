@@ -4,15 +4,15 @@ players = []
 
 #A player consists of a name, number and a list of countries 
 class Player:
-    
-    NEXT_NUMBER = 1
+    # Class variables
+    NextNumber = 1
     
     def __init__(self, name="N/A", occupied=[]):
         
         self.__name = name
-        self.__number = NEXT_NUMBER
+        self.__number = Player.NextNumber
         self.__occupied = occupied
-        NEXT_NUMBER += 1
+        Player.NextNumber += 1
 
     def getName(self):
         return self.__name
@@ -64,8 +64,8 @@ class Player:
                     # Move associated troops
                     if myTroops <= 4:
                         country.setNumOfTroops(result[0] - 1)
-                    else =:
-                        options = [3:result[0] - 1]
+                    else:
+                        options = range(3,(result[0] - 1))
                         move = int(input("How many troops do you want to move? (", options, ")"))
                         if move in options:
                             country.setNumOfTroops(move)
@@ -228,8 +228,8 @@ def whoWins(myTroops, enemyTroops):
     return finalResult ##Final troop counts [myTroops, enemyTroops, Boolean]
 
 def playerInitializer():
-    player1 = Player("Josh", [brazil, centralAmerica])
-    player2 = Player("Player2", [venezuela, peru])
+    player1 = Player("Josh", [])
+    player2 = Player("Player2", [])
     
     players.append(player1)
     players.append(player2)
@@ -337,7 +337,7 @@ def boardInitializer():
 
 
 boardInitializer()
-playerInitializer
+playerInitializer()
 
 
 
