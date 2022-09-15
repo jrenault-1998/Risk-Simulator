@@ -2,21 +2,23 @@ board = []
 players = []
 
 
-#A player consists of a name, colour and a list of countries 
+#A player consists of a name, number and a list of countries 
 class Player:
-  
-    def __init__(self, name="N/A", colour="N/A", \
-                 occupied=[]):
+    
+    NEXT_NUMBER = 1
+    
+    def __init__(self, name="N/A", occupied=[]):
         
         self.__name = name
-        self.__colour = colour
+        self.__number = NEXT_NUMBER
         self.__occupied = occupied
+        NEXT_NUMBER += 1
 
     def getName(self):
         return self.__name
 
-    def getColour(self):
-        return self.__colour
+    def getNumber(self):
+        return self.__number
 
     def getCountriesOccupied(self):
         return self.__occupied
@@ -34,6 +36,7 @@ class Player:
     def addCountry(self, country):
         self.__occupied.append(country)
 
+    ## Simulates an attack and updates accordingly
     def attackCountry(self, startCountry):
         options = startCountry.getNearbyCountryNames
         print("Here are your options: ", options)
@@ -72,13 +75,16 @@ class Player:
 
 
                 else: ##Defender wins
+                    country.setNumOfTroops(result[1])
+                    startCountry.setNumOfTroops(result[0])
                     
                 break
+        
             
 
 ##    GOAL    
 ## Player: Josh
-## Colour: Orange
+## Number: 1
 ## Countries occupied:
     ## North Africa: 5
     ## Brazil: 6
@@ -91,8 +97,8 @@ class Player:
             name = country[0].getName()
             troops = str(country[1])
             countriesStr = countriesStr + "\t" + name + ": " + troops + "\n"
-        return"Player: %s \nColour: %s \nCountries occupied: \n%s" % \
-               (self.__name, self.__colour, countriesStr)
+        return"Player: %s \nNumber: %s \nCountries occupied: \n%s" % \
+               (self.__name, self.__number, countriesStr)
 
 
                
@@ -221,6 +227,13 @@ def whoWins(myTroops, enemyTroops):
     
     return finalResult ##Final troop counts [myTroops, enemyTroops, Boolean]
 
+def playerInitializer():
+    player1 = Player("Josh", [brazil, centralAmerica])
+    player2 = Player("Player2", [venezuela, peru])
+    
+    players.append(player1)
+    players.append(player2)
+
 
 def boardInitializer():    
     ##Country variables are created
@@ -324,7 +337,7 @@ def boardInitializer():
 
 
 boardInitializer()
-
+playerInitializer
 
 
 
