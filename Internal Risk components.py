@@ -352,13 +352,7 @@ def boardInitializer():
     board.append(southAfrica)
     board.append(madagascar)
 
-
-
-
-
-def main():
-    boardInitializer()
-    random.shuffle(board)
+def numOfPlayers():
     numOfPlayers = int(input("How many players? (3-6 players allowed): "))
     
     ## 6 players = 20 troops
@@ -366,18 +360,15 @@ def main():
     ## 4 players = 30
     ## 3 players = 35
     if numOfPlayers in range(3,6):
-        troopCount = 50 - 5*numOfPlayers
+        return 50 - 5*numOfPlayers
     else:
-        return("Please pick a reasonable number of players")    ## Need to re-ask the question
+        print("Please pick a reasonable number of players\n")
+        numOfPlayers()
 
-
-### Next Steps...
-##try:
-##    newlist.append(dlist[1])
-##except IndexError:
-##    pass
-##continue
-
+def main():
+    boardInitializer()
+    random.shuffle(board)
+    numOfPlayers = numOfPlayers()
 
     ## Initialize Players
     for i in range(numOfPlayers):
