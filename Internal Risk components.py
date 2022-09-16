@@ -365,10 +365,19 @@ def main():
     ## 5 players = 25
     ## 4 players = 30
     ## 3 players = 35
-    if numOfPlayers in range(3,7):
+    if numOfPlayers in range(3,6):
         troopCount = 50 - 5*numOfPlayers
     else:
         return("Please pick a reasonable number of players")    ## Need to re-ask the question
+
+
+### Next Steps...
+##try:
+##    newlist.append(dlist[1])
+##except IndexError:
+##    pass
+##continue
+
 
     ## Initialize Players
     for i in range(numOfPlayers):
@@ -398,10 +407,7 @@ def main():
         print(players[i])
 
     for i in range(4):
-        print(board[i])
-
-            
-        
+        print(board[i])      
 
 main()    
 
