@@ -352,26 +352,55 @@ def boardInitializer():
     board.append(southAfrica)
     board.append(madagascar)
 
-def numOfPlayers():
-    numOfPlayers = int(input("How many players? (3-6 players allowed): "))
+def numOfStartPlayers():
+    numOfStartPlayers = int(input("How many players? (3-6 players allowed): "))
     
     ## 6 players = 20 troops
     ## 5 players = 25
     ## 4 players = 30
     ## 3 players = 35
-    if numOfPlayers in range(3,6):
-        return 50 - 5*numOfPlayers
+    if numOfStartPlayers in range(3,6):
+        return 50 - 5*numOfStartPlayers
     else:
         print("Please pick a reasonable number of players\n")
-        numOfPlayers()
+        numOfStartPlayers()
+
+
+##from PIL import Image
+##from PIL import ImageFont
+##from PIL import ImageDraw 
+##
+##img = Image.open("sample_in.jpg")
+##draw = ImageDraw.Draw(img)
+### font = ImageFont.truetype(<font-file>, <font-size>)
+##font = ImageFont.truetype("sans-serif.ttf", 16)
+### draw.text((x, y),"Sample Text",(r,g,b))
+##draw.text((0, 0),"Sample Text",(255,255,255),font=font)
+##img.save('sample-out.jpg')
+
+
+
+##from PIL import ImageDraw
+##...
+##ImageDraw.Draw(
+##    image  # Image
+##).text(
+##    (0, 0),  # Coordinates
+##    'Hello world!',  # Text
+##    (0, 0, 0)  # Color
+##)
+
+
+
+
 
 def main():
     boardInitializer()
     random.shuffle(board)
-    numOfPlayers = numOfPlayers()
+    numOfStartPlayers = numOfStartPlayers()
 
     ## Initialize Players
-    for i in range(numOfPlayers):
+    for i in range(numOfStartPlayers):
         playerNumber = str(i+1)
         name = input("What is the name of player " + playerNumber + "? ")
         players.append(Player(name, []))
@@ -379,7 +408,7 @@ def main():
     ## Gives each player a set of countries
     for i in range(len(board)):
         country = board[i]
-        index = i % numOfPlayers
+        index = i % numOfStartPlayers
         player = players[index]
         country.setPlayerName(player.getName())
         player.addCountry(country)
