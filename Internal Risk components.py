@@ -1,12 +1,190 @@
 import math
 import random
 
-## List of Countries
-board = []
+class Game:
 
-#List of Players
-players = []
+    def __init__(self):
+        self.__board = []
+        self.__players = []
+        self.__turn = 1
+        self.__sets = 0
+        self.boardInitializer()
+        random.shuffle(Game.Board)
+        numOfPlayers = self.numOfStartPlayers()
+        troopCount = self.numOfStartTroops(numOfPlayers)
+        self.initPlayers(numOfPlayers)
+        self.initCountries()
+        self.addLeftoverTroops(troopCount)
+        
 
+    def getPlayers(self):
+        return Game.Players
+
+    def getBoard(self):
+        return Game.Board
+
+    def getTurn(self):
+        return Game.Turn
+
+    def getSets(self):
+        return Game.Sets
+
+    def addCountry(self, country):
+        self.__board.append(country)
+
+    def removePlayer(self, player):
+        Game.Players.remove(player)
+
+    def addTurn(self):
+        Game.Turn += 1
+
+    def addSet(self):
+        Game.Sets += 1
+
+    ## Initialize Players
+    def initPlayers(self, numOfPlayers):
+        for i in range(numOfPlayers):
+            playerNumber = str(i+1)
+            name = "Player " + str(i)         ## input("What is the name of player " + playerNumber + "? ")
+            Game.Players.append(Player(name, []))
+
+    ## Gives each player a set of countries
+    def initCountries(self):
+        for i in range(len(Game.Board)):
+            country = Game.Board[i]
+            index = i % len(Game.Players)
+            player = Game.Players[index]
+            country.setPlayerName(player.getName())
+            player.addCountry(country)
+            
+    ## Adds remaining troops to each players' countries
+    def addLeftoverTroops(self, troopCount):
+        for i in range(len(Game.Players)):
+            player = Game.Players[i]
+            remaining = troopCount - player.getTotalTroops()
+            countries = player.getCountriesOccupied()
+            numOfCountries = len(countries)
+            for j in range(remaining):
+                index = random.randint(0,(numOfCountries - 1))
+                countries[index].addTroop()
+
+    def boardInitializer():
+        ##Country variables are created
+        brazil = Country("Brazil", "", 1, "South America", ["Argentina", "North Africa", "Peru", "Venezuela"])
+        venezuela = Country("Venezuela", "", 1, "South America", ["Central America", "Brazil", "Peru"])
+        peru = Country("Peru", "", 1, "South America", ["Argentina", "Brazil", "Venezuela"])
+        argentina = Country("Argentina", "", 1, "South America", ["Brazil", "Peru"])
+
+        centralAmerica = Country("Central America", "", 1, "North America", ["Western US", "Eastern US", "Venezuela"])
+        westernUS = Country("Western US", "", 1, "North America", ["Central America", "Eastern US", "Ontario", "Alberta"])
+        easternUS = Country("Eastern US", "", 1, "North America", ["Western US", "Central America", "Quebec", "Ontario"])
+        quebec = Country("Quebec", "", 1, "North America", ["Ontario", "Eastern US", "Greenland"])
+        ontario = Country("Ontario", "", 1, "North America", ["Western US", "Eastern US", "Quebec", "Alberta", "Northwest Territory", "Greenland"])
+        alberta = Country("Alberta", "", 1, "North America", ["Western US", "Ontario", "Northwest Territory", "Alaska"])
+        greenland = Country("Greenland", "", 1, "North America", ["Iceland", "Quebec", "Ontario", "Northwest Territory"])
+        northwestTerritory = Country("Northwest Territory", "", 1, "North America", ["Alberta", "Ontario", "Greenland", "Alaska"])
+        alaska = Country("Alaska", "", 1, "North America", ["Alberta", "Northwest Territory", "Kamchatka"])
+
+        kamchatka = Country("Kamchatka", "", 1, "Asia", ["Alaska", "Japan", "Mongolia", "Irkutsk", "Yakutsk"])
+        yakutsk = Country("Yakutsk", "", 1, "Asia", ["Kamchatka", "Siberia", "Irkutsk"])
+        irkutsk = Country("Irkutsk", "", 1, "Asia", ["Siberia", "Kamchatka", "Mongolia", "Irkutsk"])
+        siberia = Country("Siberia", "", 1, "Asia", ["Ural", "China", "Mongolia", "Irkutsk", "Yakutsk"])
+        mongolia = Country("Mongolia", "", 1, "Asia", ["China", "Japan", "Ural", "Irkutsk", "Kamchatka"])
+        china = Country("China", "", 1, "Asia", ["Siam", "India", "Mongolia", "Afghanistan", "Ural", "Siberia"])
+        japan = Country("Japan", "", 1, "Asia", ["Kamchatka", "Mongolia"])
+        ural = Country("Ural", "", 1, "Asia", ["Ukraine", "Afghanistan", "Siberia", "China"])
+        afghanistan = Country("Afghanistan", "", 1, "Asia", ["Ukraine", "Middle East", "Ural", "China", "India"])
+        siam = Country("Siam", "", 1, "Asia", ["Indonesia", "China", "India"])
+        india = Country("India", "", 1, "Asia", ["Siam", "China", "Afghanistan", "Middle East"])
+        middleEast = Country("Middle East", "", 1, "Asia", ["India", "Afghanistan", "Ukraine", "Southern Europe", "Egypt", "East Africa"])
+
+        indonesia = Country("Indonesia", "", 1, "Oceania", ["Siam", "Western Australia", "New Guinea"])
+        westernAustralia = Country("Western Australia", "", 1, "Oceania", ["Eastern Australia", "Indonesia", "New Guinea"])
+        easternAustralia = Country("Eastern Australia", "", 1, "Oceania", ["Western Australia", "New Guinea"])
+        newGuinea = Country("New Guinea", "", 1, "Oceania", ["Indonesia", "Eastern Australia"])
+
+        ukraine = Country("Ukraine", "", 1, "Europe", ["Ural", "Afghanistan", "Middle East", "Southern Europe", "Northern Europe", "Scandinavia"])
+        northernEurope = Country("Northern Europe", "", 1, "Europe", ["Scandinavia", "Western Europe", "Southern Europe", "Ukraine", "Great Britain"])
+        southernEurope = Country("Southern Europe", "", 1, "Europe", ["Middle East", "Western Europe", "Northern Europe", "Ukraine", "Egypt", "North Africa"])
+        westernEurope = Country("Western Europe", "", 1, "Europe", ["North Africa", "Northern Europe", "Southern Europe", "Great Britain"])
+        greatBritain = Country("Great Britain", "", 1, "Europe", ["Iceland", "Western Europe", "Northern Europe", "Scandinavia"])
+        iceland = Country("Iceland", "", 1, "Europe", ["Greenland", "Scandinavia", "Great Britain"])
+        scandinavia = Country("Scandinavia", "", 1, "Europe", ["Iceland", "Northern Europe",  "Ukraine", "Great Britain"])
+
+        egypt = Country("Egypt", "", 1, "Africa", ["East Africa", "Southern Europe",  "Middle East", "North Africa"])
+        northAfrica = Country("North Africa", "", 1, "Africa", ["East Africa", "Southern Europe",  "Western Europe", "Egypt", "Congo"])
+        eastAfrica = Country("East Africa", "", 1, "Africa", ["Congo", "Madagascar",  "Middle East", "North Africa", "South Africa", "Egypt"])
+        congo = Country("Congo", "", 1, "Africa", ["East Africa", "South Africa", "North Africa"])
+        southAfrica = Country("South Africa", "", 1, "Africa", ["East Africa", "Congo",  "Madagascar"])
+        madagascar = Country("Madagascar", "", 1, "Africa", ["South Africa", "East Africa"])
+        
+        ##Country objects are inserted into a list which is the "board"
+        self.addCountry(brazil)
+        Game.Board.append(venezuela)
+        Game.Board.append(peru)
+        Game.Board.append(argentina)
+        
+        Game.Board.append(centralAmerica)
+        Game.Board.append(westernUS)
+        Game.Board.append(easternUS)
+        Game.Board.append(quebec)
+        Game.Board.append(ontario)
+        Game.Board.append(alberta)
+        Game.Board.append(greenland)
+        Game.Board.append(northwestTerritory)
+        Game.Board.append(alaska)
+        
+        Game.Board.append(kamchatka)
+        Game.Board.append(yakutsk)
+        Game.Board.append(irkutsk)
+        Game.Board.append(siberia)
+        Game.Board.append(mongolia)
+        Game.Board.append(china)
+        Game.Board.append(japan)
+        Game.Board.append(ural)
+        Game.Board.append(afghanistan)
+        Game.Board.append(siam)
+        Game.Board.append(india)
+        Game.Board.append(middleEast)
+        
+        Game.Board.append(indonesia)
+        Game.Board.append(westernAustralia)
+        Game.Board.append(easternAustralia)
+        Game.Board.append(newGuinea)
+        
+        Game.Board.append(ukraine)
+        Game.Board.append(northernEurope)
+        Game.Board.append(southernEurope)
+        Game.Board.append(westernEurope)
+        Game.Board.append(greatBritain)
+        Game.Board.append(iceland)
+        Game.Board.append(scandinavia)
+        
+        Game.Board.append(egypt)
+        Game.Board.append(northAfrica)
+        Game.Board.append(eastAfrica)
+        Game.Board.append(congo)
+        Game.Board.append(southAfrica)
+        Game.Board.append(madagascar)
+
+    def numOfStartPlayers():
+        numOfPlayers =  3 ## int(input("How many players? (2-6 players allowed): "))
+        if numOfPlayers in range(2,6):
+            return numOfPlayers
+        else:
+            print("Please pick a reasonable number of players\n")
+            numOfStartPlayers()
+
+            
+    ## 6 players = 20 troops
+    ## 5 players = 25
+    ## 4 players = 30
+    ## 3 players = 35
+    ## 2 players = 40
+    def numOfStartTroops(numOfPlayers):
+        return 50 - 5*numOfPlayers
+
+    
 
 #A player consists of a name, number and a list of countries
 class Player:
@@ -141,7 +319,17 @@ class Player:
             if countryName in occupiedCountryNames:
                 nearbyCountries.remove(countryName)
         return nearbyCountries
-        
+    
+    #Needs work
+    def attackDecision(self, attackingCountry):
+        options = self.invadableCountries(attackingCountry)
+        print("Here are your options: ", options)
+        defender = input("Who are you attacking? ")
+        if len(options) > 0:
+            index = random.randint(0, (len(options)-1))
+            defender = options[index]
+            self.attackCountry(attackingCountry, defender)
+            ##Else, don't attack    
         
     def attackRandom(self, attackingCountry):
         options = self.invadableCountries(attackingCountry)
@@ -196,16 +384,9 @@ class Player:
 
                 else: ##Defender wins
                     country.setNumOfTroops(result[1])
-                    startCountry.setNumOfTroops(result[0])
-
-                    
-            
-                    
+                    startCountry.setNumOfTroops(result[0])                    
                 break
         
-            
-
-
 ##    Displays
 ## Player: Josh
 ## Number: 1
@@ -213,8 +394,6 @@ class Player:
     ## North Africa: 5
     ## Brazil: 6
     ## ...
-
-    
     def __str__(self):
         countriesStr = ""
         for country in self.__occupied:
@@ -226,7 +405,7 @@ class Player:
 
 
 
-#Country consists of a name, a player name, nuber of troops, a continent and a list of nearby countries
+#Country consists of a name, a player name, number of troops, a continent and a list of nearby countries
                
 class Country:
 
@@ -363,165 +542,18 @@ def whoWins(myTroops, enemyTroops):
     return finalResult ##Final troop counts [myTroops, enemyTroops, Boolean]
 
 
-
-
-def boardInitializer():
-    ##Country variables are created
-    brazil = Country("Brazil", "", 1, "South America", ["Argentina", "North Africa", "Peru", "Venezuela"])
-    venezuela = Country("Venezuela", "", 1, "South America", ["Central America", "Brazil", "Peru"])
-    peru = Country("Peru", "", 1, "South America", ["Argentina", "Brazil", "Venezuela"])
-    argentina = Country("Argentina", "", 1, "South America", ["Brazil", "Peru"])
-
-    centralAmerica = Country("Central America", "", 1, "North America", ["Western US", "Eastern US", "Venezuela"])
-    westernUS = Country("Western US", "", 1, "North America", ["Central America", "Eastern US", "Ontario", "Alberta"])
-    easternUS = Country("Eastern US", "", 1, "North America", ["Western US", "Central America", "Quebec", "Ontario"])
-    quebec = Country("Quebec", "", 1, "North America", ["Ontario", "Eastern US", "Greenland"])
-    ontario = Country("Ontario", "", 1, "North America", ["Western US", "Eastern US", "Quebec", "Alberta", "Northwest Territory", "Greenland"])
-    alberta = Country("Alberta", "", 1, "North America", ["Western US", "Ontario", "Northwest Territory", "Alaska"])
-    greenland = Country("Greenland", "", 1, "North America", ["Iceland", "Quebec", "Ontario", "Northwest Territory"])
-    northwestTerritory = Country("Northwest Territory", "", 1, "North America", ["Alberta", "Ontario", "Greenland", "Alaska"])
-    alaska = Country("Alaska", "", 1, "North America", ["Alberta", "Northwest Territory", "Kamchatka"])
-
-    kamchatka = Country("Kamchatka", "", 1, "Asia", ["Alaska", "Japan", "Mongolia", "Irkutsk", "Yakutsk"])
-    yakutsk = Country("Yakutsk", "", 1, "Asia", ["Kamchatka", "Siberia", "Irkutsk"])
-    irkutsk = Country("Irkutsk", "", 1, "Asia", ["Siberia", "Kamchatka", "Mongolia", "Irkutsk"])
-    siberia = Country("Siberia", "", 1, "Asia", ["Ural", "China", "Mongolia", "Irkutsk", "Yakutsk"])
-    mongolia = Country("Mongolia", "", 1, "Asia", ["China", "Japan", "Ural", "Irkutsk", "Kamchatka"])
-    china = Country("China", "", 1, "Asia", ["Siam", "India", "Mongolia", "Afghanistan", "Ural", "Siberia"])
-    japan = Country("Japan", "", 1, "Asia", ["Kamchatka", "Mongolia"])
-    ural = Country("Ural", "", 1, "Asia", ["Ukraine", "Afghanistan", "Siberia", "China"])
-    afghanistan = Country("Afghanistan", "", 1, "Asia", ["Ukraine", "Middle East", "Ural", "China", "India"])
-    siam = Country("Siam", "", 1, "Asia", ["Indonesia", "China", "India"])
-    india = Country("India", "", 1, "Asia", ["Siam", "China", "Afghanistan", "Middle East"])
-    middleEast = Country("Middle East", "", 1, "Asia", ["India", "Afghanistan", "Ukraine", "Southern Europe", "Egypt", "East Africa"])
-
-    indonesia = Country("Indonesia", "", 1, "Oceania", ["Siam", "Western Australia", "New Guinea"])
-    westernAustralia = Country("Western Australia", "", 1, "Oceania", ["Eastern Australia", "Indonesia", "New Guinea"])
-    easternAustralia = Country("Eastern Australia", "", 1, "Oceania", ["Western Australia", "New Guinea"])
-    newGuinea = Country("New Guinea", "", 1, "Oceania", ["Indonesia", "Eastern Australia"])
-
-    ukraine = Country("Ukraine", "", 1, "Europe", ["Ural", "Afghanistan", "Middle East", "Southern Europe", "Northern Europe", "Scandinavia"])
-    northernEurope = Country("Northern Europe", "", 1, "Europe", ["Scandinavia", "Western Europe", "Southern Europe", "Ukraine", "Great Britain"])
-    southernEurope = Country("Southern Europe", "", 1, "Europe", ["Middle East", "Western Europe", "Northern Europe", "Ukraine", "Egypt", "North Africa"])
-    westernEurope = Country("Western Europe", "", 1, "Europe", ["North Africa", "Northern Europe", "Southern Europe", "Great Britain"])
-    greatBritain = Country("Great Britain", "", 1, "Europe", ["Iceland", "Western Europe", "Northern Europe", "Scandinavia"])
-    iceland = Country("Iceland", "", 1, "Europe", ["Greenland", "Scandinavia", "Great Britain"])
-    scandinavia = Country("Scandinavia", "", 1, "Europe", ["Iceland", "Northern Europe",  "Ukraine", "Great Britain"])
-
-    egypt = Country("Egypt", "", 1, "Africa", ["East Africa", "Southern Europe",  "Middle East", "North Africa"])
-    northAfrica = Country("North Africa", "", 1, "Africa", ["East Africa", "Southern Europe",  "Western Europe", "Egypt", "Congo"])
-    eastAfrica = Country("East Africa", "", 1, "Africa", ["Congo", "Madagascar",  "Middle East", "North Africa", "South Africa", "Egypt"])
-    congo = Country("Congo", "", 1, "Africa", ["East Africa", "South Africa", "North Africa"])
-    southAfrica = Country("South Africa", "", 1, "Africa", ["East Africa", "Congo",  "Madagascar"])
-    madagascar = Country("Madagascar", "", 1, "Africa", ["South Africa", "East Africa"])
-    
-    ##Country objects are inserted into a list which is the "board"
-    board.append(brazil)
-    board.append(venezuela)
-    board.append(peru)
-    board.append(argentina)
-    
-    board.append(centralAmerica)
-    board.append(westernUS)
-    board.append(easternUS)
-    board.append(quebec)
-    board.append(ontario)
-    board.append(alberta)
-    board.append(greenland)
-    board.append(northwestTerritory)
-    board.append(alaska)
-    
-    board.append(kamchatka)
-    board.append(yakutsk)
-    board.append(irkutsk)
-    board.append(siberia)
-    board.append(mongolia)
-    board.append(china)
-    board.append(japan)
-    board.append(ural)
-    board.append(afghanistan)
-    board.append(siam)
-    board.append(india)
-    board.append(middleEast)
-    
-    board.append(indonesia)
-    board.append(westernAustralia)
-    board.append(easternAustralia)
-    board.append(newGuinea)
-    
-    board.append(ukraine)
-    board.append(northernEurope)
-    board.append(southernEurope)
-    board.append(westernEurope)
-    board.append(greatBritain)
-    board.append(iceland)
-    board.append(scandinavia)
-    
-    board.append(egypt)
-    board.append(northAfrica)
-    board.append(eastAfrica)
-    board.append(congo)
-    board.append(southAfrica)
-    board.append(madagascar)
-
-def numOfStartPlayers():
-    numOfPlayers =  3            ## int(input("How many players? (2-6 players allowed): "))
-    
-    ## 6 players = 20 troops
-    ## 5 players = 25
-    ## 4 players = 30
-    ## 3 players = 35
-    ## 2 players = 40
-    if numOfPlayers in range(2,6):
-        return numOfPlayers
-    else:
-        print("Please pick a reasonable number of players\n")
-        numOfStartPlayers()
-
-def numOfStartTroops(numOfPlayers):
-    return 50 - 5*numOfPlayers
-
-
-
 ## Prints board status by printing all players
-def printPlayers():
+def printPlayers(game):
+    players = game.getPlayers()
     for i in range(len(players)):
         print(players[i])
 
 
 
 def main():
-    boardInitializer()
-    random.shuffle(board)
-    numOfPlayers = numOfStartPlayers()
-    troopCount = numOfStartTroops(numOfPlayers)
-
-    ## Initialize Players
-    for i in range(numOfPlayers):
-        playerNumber = str(i+1)
-        name = "Player " + str(i)         ## input("What is the name of player " + playerNumber + "? ")
-        players.append(Player(name, []))
-
-    ## Gives each player a set of countries
-    for i in range(len(board)):
-        country = board[i]
-        index = i % numOfPlayers
-        player = players[index]
-        country.setPlayerName(player.getName())
-        player.addCountry(country)
-
-    ## Adds remaining troops to each players' countries
-    for i in range(len(players)):
-        player = players[i]
-        remaining = troopCount - player.getTotalTroops()
-        countries = player.getCountriesOccupied()
-        numOfCountries = len(countries)
-        for j in range(remaining):
-            index = random.randint(0,(numOfCountries - 1))
-            countries[index].addTroop()
-
+    gameType = input("What kind of game do you want to play? ('random' or 'normal'): ")
+    game = Game()
     printPlayers()
-    turn = 1
     #Play the game to completion
     while len(players) > 1 and turn < 500:
     #while turn < 15:
@@ -541,10 +573,7 @@ def main():
             for player in players:
                 print(turn)
                 print(player)
-
-    
-
-    
+   
 
 main()
 
