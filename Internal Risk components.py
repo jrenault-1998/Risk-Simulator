@@ -3,13 +3,14 @@ import random
 
 class Game:
 
-    def __init__(self):
+    def __init__(self, gameType = ""):
+        self.__gameType = gameType
         self.__board = []
         self.__players = []
         self.__turn = 1
         self.__sets = 0
         self.boardInitializer()
-        random.shuffle(Game.Board)
+        random.shuffle(self.__board)
         numOfPlayers = self.numOfStartPlayers()
         troopCount = self.numOfStartTroops(numOfPlayers)
         self.initPlayers(numOfPlayers)
@@ -18,35 +19,35 @@ class Game:
         
 
     def getPlayers(self):
-        return Game.Players
+        return self.__players
 
     def getBoard(self):
-        return Game.Board
+        return self.__board
 
     def getTurn(self):
-        return Game.Turn
+        return self.__turn
 
     def getSets(self):
-        return Game.Sets
+        return self.__sets
 
     def addCountry(self, country):
         self.__board.append(country)
 
     def removePlayer(self, player):
-        Game.Players.remove(player)
+        self.__players.remove(player)
 
     def addTurn(self):
-        Game.Turn += 1
+        self.__turn += 1
 
     def addSet(self):
-        Game.Sets += 1
+        self.__sets += 1
 
     ## Initialize Players
     def initPlayers(self, numOfPlayers):
         for i in range(numOfPlayers):
             playerNumber = str(i+1)
-            name = "Player " + str(i)         ## input("What is the name of player " + playerNumber + "? ")
-            Game.Players.append(Player(name, []))
+            name = input("What is the name of player " + playerNumber + "? ")
+            self.__players.append(Player(name, []))
 
     ## Gives each player a set of countries
     def initCountries(self):
@@ -68,7 +69,7 @@ class Game:
                 index = random.randint(0,(numOfCountries - 1))
                 countries[index].addTroop()
 
-    def boardInitializer():
+    def boardInitializer(self):
         ##Country variables are created
         brazil = Country("Brazil", "", 1, "South America", ["Argentina", "North Africa", "Peru", "Venezuela"])
         venezuela = Country("Venezuela", "", 1, "South America", ["Central America", "Brazil", "Peru"])
@@ -120,60 +121,60 @@ class Game:
         
         ##Country objects are inserted into a list which is the "board"
         self.addCountry(brazil)
-        Game.Board.append(venezuela)
-        Game.Board.append(peru)
-        Game.Board.append(argentina)
+        self.addCountry(venezuela)
+        self.addCountry(peru)
+        self.addCountry(argentina)
         
-        Game.Board.append(centralAmerica)
-        Game.Board.append(westernUS)
-        Game.Board.append(easternUS)
-        Game.Board.append(quebec)
-        Game.Board.append(ontario)
-        Game.Board.append(alberta)
-        Game.Board.append(greenland)
-        Game.Board.append(northwestTerritory)
-        Game.Board.append(alaska)
+        self.addCountry(centralAmerica)
+        self.addCountry(westernUS)
+        self.addCountry(easternUS)
+        self.addCountry(quebec)
+        self.addCountry(ontario)
+        self.addCountry(alberta)
+        self.addCountry(greenland)
+        self.addCountry(northwestTerritory)
+        self.addCountry(alaska)
         
-        Game.Board.append(kamchatka)
-        Game.Board.append(yakutsk)
-        Game.Board.append(irkutsk)
-        Game.Board.append(siberia)
-        Game.Board.append(mongolia)
-        Game.Board.append(china)
-        Game.Board.append(japan)
-        Game.Board.append(ural)
-        Game.Board.append(afghanistan)
-        Game.Board.append(siam)
-        Game.Board.append(india)
-        Game.Board.append(middleEast)
+        self.addCountry(kamchatka)
+        self.addCountry(yakutsk)
+        self.addCountry(irkutsk)
+        self.addCountry(siberia)
+        self.addCountry(mongolia)
+        self.addCountry(china)
+        self.addCountry(japan)
+        self.addCountry(ural)
+        self.addCountry(afghanistan)
+        self.addCountry(siam)
+        self.addCountry(india)
+        self.addCountry(middleEast)
         
-        Game.Board.append(indonesia)
-        Game.Board.append(westernAustralia)
-        Game.Board.append(easternAustralia)
-        Game.Board.append(newGuinea)
+        self.addCountry(indonesia)
+        self.addCountry(westernAustralia)
+        self.addCountry(easternAustralia)
+        self.addCountry(newGuinea)
         
-        Game.Board.append(ukraine)
-        Game.Board.append(northernEurope)
-        Game.Board.append(southernEurope)
-        Game.Board.append(westernEurope)
-        Game.Board.append(greatBritain)
-        Game.Board.append(iceland)
-        Game.Board.append(scandinavia)
+        self.addCountry(ukraine)
+        self.addCountry(northernEurope)
+        self.addCountry(southernEurope)
+        self.addCountry(westernEurope)
+        self.addCountry(greatBritain)
+        self.addCountry(iceland)
+        self.addCountry(scandinavia)
         
-        Game.Board.append(egypt)
-        Game.Board.append(northAfrica)
-        Game.Board.append(eastAfrica)
-        Game.Board.append(congo)
-        Game.Board.append(southAfrica)
-        Game.Board.append(madagascar)
+        self.addCountry(egypt)
+        self.addCountry(northAfrica)
+        self.addCountry(eastAfrica)
+        self.addCountry(congo)
+        self.addCountry(southAfrica)
+        self.addCountry(madagascar)
 
-    def numOfStartPlayers():
-        numOfPlayers =  3 ## int(input("How many players? (2-6 players allowed): "))
+    def numOfStartPlayers(self):
+        numOfPlayers =  int(input("How many players? (2-6 players allowed): "))
         if numOfPlayers in range(2,6):
             return numOfPlayers
         else:
             print("Please pick a reasonable number of players\n")
-            numOfStartPlayers()
+            self.numOfStartPlayers()
 
             
     ## 6 players = 20 troops
@@ -181,7 +182,7 @@ class Game:
     ## 4 players = 30
     ## 3 players = 35
     ## 2 players = 40
-    def numOfStartTroops(numOfPlayers):
+    def numOfStartTroops(self, numOfPlayers):
         return 50 - 5*numOfPlayers
 
     
@@ -548,32 +549,87 @@ def printPlayers(game):
     for i in range(len(players)):
         print(players[i])
 
+        
+#Play the fixed game to completion
+def fixedGame(game):
+    while len(game.getPlayers()) > 1:
+                
+                #Each player plays turn
+                players = game.getPlayers()
+                for i in range(len(players)):
+                    player = players[i]
+                    if not player.isAlive():
+                        print(player)
+                        print("Player ", player.getName(), " Has Been Terminated From The Board!")
+                        game.removePlayer(player)
+                    else:
+                        player.draftFixed()
+                        player.attack()
+                        player.fortify()
+                game.addTurn()
 
+#Play the progressive game to completion
+def progressiveGame(game):
+    while len(game.getPlayers()) > 1:
+                
+                #Each player plays turn
+                players = game.getPlayers()
+                for i in range(len(players)):
+                    player = players[i]
+                    if not player.isAlive():
+                        print(player)
+                        print("Player ", player.getName(), " Has Been Terminated From The Board!")
+                        game.removePlayer(player)
+                    else:
+                        player.draftProgressive()
+                        player.attack()
+                        player.fortify()
+                game.addTurn()
 
-def main():
-    gameType = input("What kind of game do you want to play? ('random' or 'normal'): ")
-    game = Game()
-    printPlayers()
-    #Play the game to completion
-    while len(players) > 1 and turn < 500:
-    #while turn < 15:
+#Autogenerate the random game to completion or to 500 turns printing the board status every 100 turns
+def randomGame(game):
+    while len(game.getPlayers()) > 1 and turn < 501:
+        
         #Each player plays turn
+        players = game.getPlayers()
         for i in range(len(players)):
             player = players[i]
             if not player.isAlive():
                 print(player)
-                print("The Above Player Has Been Terminated From The Board!")
-                players.remove(player)
+                print("Player ", player.getName(), " Has Been Terminated From The Board!")
+                game.removePlayer(player)
             else:
                 countryDrafted = player.draftRandom()
                 player.attackRandom(countryDrafted)
-                #player.fortifyRandom()
-        turn += 1
-        if turn in [100,200,300,400,499]:
+                player.fortifyRandom()
+        game.addTurn()
+        if turn in [100,200,300,400,500]:
             for player in players:
                 print(turn)
                 print(player)
-   
+
+def main():
+    # Random autogenerates moves and uses progressive cards
+    gameType = input("What kind of game do you want to play? ('fixed', 'progressive' or 'random'): ")
+    gameOptions = ['fixed', 'progressive', 'random']
+    if gameType not in gameOptions:
+        print(gameType, " is not an available option!")
+        main()
+    else:
+        game = Game(gameType)
+        printPlayers(game)
+        print("The game ", gameType, " will now begin")
+
+        if gameType == gameOptions[0]: 
+            progressiveGame(game)
+            
+
+        elif gameType == gameOptions[1]: 
+            fixedGame(game)
+
+        elif gameType == gameOptions[2]: 
+            randomGame(game)
+
 
 main()
 
