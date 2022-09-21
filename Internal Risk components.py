@@ -361,19 +361,30 @@ class Player:
         
     def attackRandom(self, attackingCountry):
         options = self.invadableCountries(attackingCountry)
-##        print("Here are your options: ", options)
-##        defender = input("Who are you attacking? ")
         if len(options) > 0:
             index = random.randint(0, (len(options)-1))
             defender = options[index]
             self.attackCountry(attackingCountry, defender)
             ##Else, don't attack
 
-
+    def attack(self, attackingCountry):
+        options = self.invadableCountries(attackingCountry)
+        print("Here are your options: \n")
+        for country in options:
+            print(country)
+        defender = input("Who are you attacking? ")
+        if len(options) > 0:
+            index = random.randint(0, (len(options)-1))
+            defender = options[index]
+            self.attackCountry(attackingCountry, defender)
+        else:
+            print("You can't attack from this base since you own all surrounding territories")
         
-    #def fortifyRandom(self):
+##    def fortifyRandom(self):
     
+##    def fortify(self):
 
+            
     ## Simulates an attack and updates accordingly
     def attackCountry(self, startCountry, defender):
         for country in board:
