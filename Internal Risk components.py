@@ -1,3 +1,4 @@
+
 import math
 import random
 
@@ -8,7 +9,7 @@ board = []
 players = []
 
 
-#A player consists of a name, number and a list of countries 
+#A player consists of a name, number and a list of countries
 class Player:
     # Class variables
     NextNumber = 1
@@ -57,6 +58,12 @@ class Player:
     def addCountry(self, country):
         self.__occupied.append(country)
 
+    def isAlive(self):
+        if self.getTotalTroops() == 0:
+            return False
+        else:
+            return True
+
     #Returns number of troops added by country count
     def draftTroopsByCountries(self):
         numOfCountries = len(self.getCountriesOccupied())
@@ -65,16 +72,60 @@ class Player:
         else:
             return numOfCountries // 3
 
-        
 
-    ## def draftTroopsByContinent(self):
+    def getContinentCount(self):
+        ## lst: [SA, NA, Asia, Oceania, Europe, Africa]
+        continentCount = [0,0,0,0,0,0]
+        for country in self.getCountriesOccupied():
+            if country.getContinent() == "South America":
+                continentCount[0] += 1
+            elif country.getContinent() == "North America":
+                continentCount[1] += 1
+            elif country.getContinent() == "Asia":
+                continentCount[2] += 1
+            elif country.getContinent() == "Oceania":
+                continentCount[3] += 1
+            elif country.getContinent() == "Europe":
+                continentCount[4] += 1
+            elif country.getContinent() == "Africa":
+                continentCount[5] += 1
+
+        return continentCount
+
+    
+    def draftTroopsByContinent(self):
+        additionalTroops = 0
+        continentCount = self.getContinentCount()
+
+        #SA
+        if continentCount[0] == 4:
+            additionalTroops += 2
+        #NA
+        elif continentCount[1] == 9:
+            additionalTroops += 5
+        #Asia
+        elif continentCount[2] == 12:
+            additionalTroops += 7
+        #Oceania
+        elif continentCount[3] == 4:
+            additionalTroops += 2
+        #Europe
+        elif continentCount[4] == 7:
+            additionalTroops += 5
+        #Africa
+        elif continentCount[5] == 6:
+            additionalTroops += 3
+
+        return additionalTroops
+
+        
     ## def draftTroopsByCards(self):
    
     #Returns country drafted to
     def draftRandom(self):
         draftTroops = 0
         draftTroops += self.draftTroopsByCountries()
-        ## draftTroops += self.draftTroopsByContinent()
+        draftTroops += self.draftTroopsByContinent()
         ## draftTroops += self.draftTroopsByCards()
         options = len(self.getCountriesOccupied()) - 1
         index = random.randint(0,options)
@@ -115,6 +166,7 @@ class Player:
                 myTroops = startCountry.getNumOfTroops()
                 enemyTroops = country.getNumOfTroops()
                 result = whoWins(myTroops, enemyTroops)
+                
                 if result[2]: ##Attacker wins
 
                     ## Add country to our list
@@ -134,7 +186,7 @@ class Player:
                     if myTroops <= 4:
                         country.setNumOfTroops(result[0] - 1)
                     else:
-                        options = range(3,(result[0] - 1))
+                        options = range(3,result[0])
                         move = result[0] - 1
                         ## move = int(input("How many troops do you want to move? (", options, ")"))
                         if move in options:
@@ -143,17 +195,19 @@ class Player:
                         else:
                             return("Error!!!! You need to pick an appropriate number of troops")  #Want this to ask the question again
 
-
                 else: ##Defender wins
                     country.setNumOfTroops(result[1])
                     startCountry.setNumOfTroops(result[0])
+
+                    
+            
                     
                 break
         
             
 
 
-##    Displays    
+##    Displays
 ## Player: Josh
 ## Number: 1
 ## Countries occupied:
@@ -173,7 +227,7 @@ class Player:
 
 
 
-#Country consists of a name, a player name, nuber of troops, a continent and a list of nearby countries              
+#Country consists of a name, a player name, nuber of troops, a continent and a list of nearby countries
                
 class Country:
 
@@ -217,7 +271,7 @@ class Country:
 
 
 
-##    Displays    
+##    Displays
 
 ## Country: Brazil
 ## Ruler's Name: Josh
@@ -312,7 +366,7 @@ def whoWins(myTroops, enemyTroops):
 
 
 
-def boardInitializer():    
+def boardInitializer():
     ##Country variables are created
     brazil = Country("Brazil", "", 1, "South America", ["Argentina", "North Africa", "Peru", "Venezuela"])
     venezuela = Country("Venezuela", "", 1, "South America", ["Central America", "Brazil", "Peru"])
@@ -432,7 +486,7 @@ def numOfStartTroops(numOfPlayers):
 
 ## Prints board status by printing all players
 def printPlayers():
-    for i in range(len(players)):   
+    for i in range(len(players)):
         print(players[i])
 
 
@@ -470,18 +524,31 @@ def main():
     printPlayers()
     turn = 1
     #Play the game to completion
-    ##while len(players) > 1:
-    while turn < 15:
+    while len(players) > 1 and turn < 500:
+    #while turn < 15:
         #Each player plays turn
         for i in range(len(players)):
             player = players[i]
-            countryDrafted = player.draftRandom()
-            player.attackRandom(countryDrafted)
-            #player.fortifyRandom()
+            if not player.isAlive():
+                print(player)
+                print("The Above Player Has Been Terminated From The Board!")
+                players.remove(player)
+            else:
+                countryDrafted = player.draftRandom()
+                player.attackRandom(countryDrafted)
+                #player.fortifyRandom()
         turn += 1
-    for player in players:
-        print(player)
+        if turn in [100,200,300,400,499]:
+            for player in players:
+                print(turn)
+                print(player)
 
     
 
-main()    
+    
+
+main()
+
+
+
+
