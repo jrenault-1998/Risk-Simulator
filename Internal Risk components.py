@@ -39,6 +39,13 @@ class Player:
             totalTroops += country.getNumOfTroops()
         return totalTroops
 
+    #Returns list of occupied country names
+    def getOccupiedCountryNames(self):
+        occupiedCountryNames = []
+        for country in self.getCountriesOccupied():
+            occupiedCountryNames.append(country.getName())
+        return occupiedCountryNames
+
 
     #Removes country from players list
     def removeCountry(self, country):
@@ -47,16 +54,62 @@ class Player:
 
 
     #Adds country to players list
-
     def addCountry(self, country):
         self.__occupied.append(country)
 
-    ## Simulates an attack and updates accordingly
-    def attackCountry(self, startCountry):
-        options = startCountry.getNearbyCountryNames
-        print("Here are your options: ", options)
-        defender = input("Who are you attacking? ")
+    #Returns number of troops added by country count
+    def draftTroopsByCountries(self):
+        numOfCountries = len(self.getCountriesOccupied())
+        if numOfCountries < 12:
+            return 3
+        else:
+            return numOfCountries // 3
+
         
+
+    ## def draftTroopsByContinent(self):
+    ## def draftTroopsByCards(self):
+   
+    #Returns country drafted to
+    def draftRandom(self):
+        draftTroops = 0
+        draftTroops += self.draftTroopsByCountries()
+        ## draftTroops += self.draftTroopsByContinent()
+        ## draftTroops += self.draftTroopsByCards()
+        options = len(self.getCountriesOccupied()) - 1
+        index = random.randint(0,options)
+        country = self.getCountriesOccupied()[index]
+        country.addTroops(draftTroops)
+        return country
+
+    
+    #Returns list of invadable countries
+    def invadableCountries(self, country):
+        occupiedCountryNames = self.getOccupiedCountryNames()
+        nearbyCountries = country.getNearbyCountryNames()
+        for countryName in nearbyCountries:
+            if countryName in occupiedCountryNames:
+                nearbyCountries.remove(countryName)
+        return nearbyCountries
+        
+        
+    def attackRandom(self, attackingCountry):
+        options = self.invadableCountries(attackingCountry)
+##        print("Here are your options: ", options)
+##        defender = input("Who are you attacking? ")
+        if len(options) > 0:
+            index = random.randint(0, (len(options)-1))
+            defender = options[index]
+            self.attackCountry(attackingCountry, defender)
+            ##Else, don't attack
+
+
+        
+    #def fortifyRandom(self):
+    
+
+    ## Simulates an attack and updates accordingly
+    def attackCountry(self, startCountry, defender):
         for country in board:
             if country.getName() == defender:
                 myTroops = startCountry.getNumOfTroops()
@@ -68,8 +121,9 @@ class Player:
                     self.addCountry(country)
                     
                     ## Remove country from defender's list
+                    defenderName = country.getPlayerName()
                     for player in players:
-                        if defender == player.getName():
+                        if defenderName == player.getName():
                             player.removeCountry(country)
                             break
 
@@ -81,7 +135,8 @@ class Player:
                         country.setNumOfTroops(result[0] - 1)
                     else:
                         options = range(3,(result[0] - 1))
-                        move = int(input("How many troops do you want to move? (", options, ")"))
+                        move = result[0] - 1
+                        ## move = int(input("How many troops do you want to move? (", options, ")"))
                         if move in options:
                             country.setNumOfTroops(move)
                             startCountry.setNumOfTroops(result[0] - move)
@@ -113,8 +168,8 @@ class Player:
             name = country.getName()
             troops = str(country.getNumOfTroops())
             countriesStr = countriesStr + "\t" + name + ": " + troops + "\n"
-        return"Player: %s \nNumber: %s \nCountries occupied: \n%s" % \
-               (self.__name, self.__number, countriesStr)
+        return"Player: %s \nNumber: %s \nTotal troops: %d \nCountries occupied: \n%s" % \
+               (self.__name, self.__number, self.getTotalTroops(), countriesStr)
 
 
 
@@ -154,7 +209,11 @@ class Country:
         self.__numOfTroops = numOfTroops
 
     def addTroop(self):
-        self.__numOfTroops += 1    
+        self.__numOfTroops += 1
+
+    def addTroops(self, troops):
+        self.__numOfTroops += troops
+    
 
 
 
@@ -274,7 +333,7 @@ def boardInitializer():
     yakutsk = Country("Yakutsk", "", 1, "Asia", ["Kamchatka", "Siberia", "Irkutsk"])
     irkutsk = Country("Irkutsk", "", 1, "Asia", ["Siberia", "Kamchatka", "Mongolia", "Irkutsk"])
     siberia = Country("Siberia", "", 1, "Asia", ["Ural", "China", "Mongolia", "Irkutsk", "Yakutsk"])
-    mongolia = Country("MNongolia", "", 1, "Asia", ["China", "Japan", "Ural", "Irkutsk", "Kamchatka"])
+    mongolia = Country("Mongolia", "", 1, "Asia", ["China", "Japan", "Ural", "Irkutsk", "Kamchatka"])
     china = Country("China", "", 1, "Asia", ["Siam", "India", "Mongolia", "Afghanistan", "Ural", "Siberia"])
     japan = Country("Japan", "", 1, "Asia", ["Kamchatka", "Mongolia"])
     ural = Country("Ural", "", 1, "Asia", ["Ukraine", "Afghanistan", "Siberia", "China"])
@@ -353,62 +412,47 @@ def boardInitializer():
     board.append(madagascar)
 
 def numOfStartPlayers():
-    numOfStartPlayers = int(input("How many players? (3-6 players allowed): "))
+    numOfPlayers =  3            ## int(input("How many players? (2-6 players allowed): "))
     
     ## 6 players = 20 troops
     ## 5 players = 25
     ## 4 players = 30
     ## 3 players = 35
-    if numOfStartPlayers in range(3,6):
-        return 50 - 5*numOfStartPlayers
+    ## 2 players = 40
+    if numOfPlayers in range(2,6):
+        return numOfPlayers
     else:
         print("Please pick a reasonable number of players\n")
         numOfStartPlayers()
 
-
-##from PIL import Image
-##from PIL import ImageFont
-##from PIL import ImageDraw 
-##
-##img = Image.open("sample_in.jpg")
-##draw = ImageDraw.Draw(img)
-### font = ImageFont.truetype(<font-file>, <font-size>)
-##font = ImageFont.truetype("sans-serif.ttf", 16)
-### draw.text((x, y),"Sample Text",(r,g,b))
-##draw.text((0, 0),"Sample Text",(255,255,255),font=font)
-##img.save('sample-out.jpg')
+def numOfStartTroops(numOfPlayers):
+    return 50 - 5*numOfPlayers
 
 
 
-##from PIL import ImageDraw
-##...
-##ImageDraw.Draw(
-##    image  # Image
-##).text(
-##    (0, 0),  # Coordinates
-##    'Hello world!',  # Text
-##    (0, 0, 0)  # Color
-##)
-
-
+## Prints board status by printing all players
+def printPlayers():
+    for i in range(len(players)):   
+        print(players[i])
 
 
 
 def main():
     boardInitializer()
     random.shuffle(board)
-    numOfStartPlayers = numOfStartPlayers()
+    numOfPlayers = numOfStartPlayers()
+    troopCount = numOfStartTroops(numOfPlayers)
 
     ## Initialize Players
-    for i in range(numOfStartPlayers):
+    for i in range(numOfPlayers):
         playerNumber = str(i+1)
-        name = input("What is the name of player " + playerNumber + "? ")
+        name = "Player " + str(i)         ## input("What is the name of player " + playerNumber + "? ")
         players.append(Player(name, []))
 
     ## Gives each player a set of countries
     for i in range(len(board)):
         country = board[i]
-        index = i % numOfStartPlayers
+        index = i % numOfPlayers
         player = players[index]
         country.setPlayerName(player.getName())
         player.addCountry(country)
@@ -423,14 +467,21 @@ def main():
             index = random.randint(0,(numOfCountries - 1))
             countries[index].addTroop()
 
-    for i in range(len(players)):   
-        print(players[i])
+    printPlayers()
+    turn = 1
+    #Play the game to completion
+    ##while len(players) > 1:
+    while turn < 15:
+        #Each player plays turn
+        for i in range(len(players)):
+            player = players[i]
+            countryDrafted = player.draftRandom()
+            player.attackRandom(countryDrafted)
+            #player.fortifyRandom()
+        turn += 1
+    for player in players:
+        print(player)
 
-    for i in range(4):
-        print(board[i])      
+    
 
 main()    
-
-
-
-
