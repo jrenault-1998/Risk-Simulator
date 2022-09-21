@@ -233,26 +233,6 @@ class Player:
         card = random.randint(1,3)
         self.__cards.append(card)
 
-    #Returns match information ([Bool, Num] = [True if has match, Max match value])
-    def hasMatch(self):
-        cards = self.getCards()
-        if len(cards) < 3:
-            return [False, 0]
-        else:
-            ones = cards.count(1)
-            twos = cards.count(2)
-            threes = cards.count(3)
-            if ones > 0 and twos > 0 and threes > 0:
-                return [True, 10]
-            elif threes > 2:
-                return [True, 8]
-            elif threes > 2:
-                return [True, 6]
-            elif threes > 2:
-                return [True, 4]
-            else:
-                return [False, 0]
-
     #Removes country from players list
     def removeCountry(self, country):
         if country in self.__occupied:
@@ -323,15 +303,57 @@ class Player:
 
         return additionalTroops
 
+    #Returns match information ([Bool, Num] = [True if has match, Max match value])
+    def hasMatch(self):
+        cards = self.getCards()
+        if len(cards) < 3:
+            return [False, 0]
+        else:
+            ones = cards.count(1)
+            twos = cards.count(2)
+            threes = cards.count(3)
+            if ones > 0 and twos > 0 and threes > 0:
+                return [True, 10]
+            elif threes > 2:
+                return [True, 8]
+            elif threes > 2:
+                return [True, 6]
+            elif threes > 2:
+                return [True, 4]
+            else:
+                return [False, 0]
         
-    ## def draftTroopsByCards(self):
+    def draftTroopsByCards(self):
+        if self.hasMatch()[0]:
+
+    def removeMatch(hasMatch):
+        if hasMatch[0]:
+            if hasMatch[1] == 10:
+                self.__cards.remove(1)
+                self.__cards.remove(2)
+                self.__cards.remove(3)
+            elif hasMatch[1] == 8:
+                self.__cards.remove(3)
+                self.__cards.remove(3)
+                self.__cards.remove(3)
+            elif hasMatch[1] == 6:
+                self.__cards.remove(2)
+                self.__cards.remove(2)
+                self.__cards.remove(2)
+            elif hasMatch[1] == 4:
+                self.__cards.remove(1)
+                self.__cards.remove(1)
+                self.__cards.remove(1)
    
     #Returns country drafted to
     def draftRandom(self):
         draftTroops = 0
         draftTroops += self.draftTroopsByCountries()
         draftTroops += self.draftTroopsByContinent()
-        draftTroops += self.draftTroopsByCards()
+        hasMatch = self.hasMatch()
+        if hasMatch[0]:
+            draftTroops += hasMatch[1]
+            self.removeMatch(hasMatch)
         options = len(self.getCountriesOccupied()) - 1
         index = random.randint(0,options)
         country = self.getCountriesOccupied()[index]
