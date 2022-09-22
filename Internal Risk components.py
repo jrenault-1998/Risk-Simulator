@@ -42,6 +42,25 @@ class Game:
     def addSet(self):
         self.__sets += 1
 
+    #Returns value of next set in a progressive game        
+    def setValue(self, game):
+        setNumber = self.getSets()
+        if setNumber == 0:
+            return 4
+        elif setNumber == 1:
+            return 6
+        elif setNumber == 2:
+            return 8
+        elif setNumber == 3:
+            return 10
+        elif setNumber == 4:
+            return 12
+        elif setNumber > 4:
+            return 5*(setNumber-2)
+        else:
+            print("Somehow set values got negative!!!!")
+            return 0
+
     ## Initialize Players
     def initPlayers(self, numOfPlayers):
         for i in range(numOfPlayers):
@@ -328,14 +347,8 @@ class Player:
                 return [True, 4]
             else:
                 return [False, 0]
-        
-    def draftTroopsByCards(self):
-        hasMatch = self.hasMatch()
-        if hasMatch[0]:
-            # ask if they want to trade
-        else:
 
-            
+    #Removes match from players hand given a trade in        
     def removeMatch(hasMatch):
         if hasMatch[0]:
             if hasMatch[1] == 10:
@@ -380,18 +393,29 @@ class Player:
         else:
             print("This is not an acceptable answer")
             self.tradeIn(hasMatch)
+            
+    #Returns number of troops leftover after deployment
+    def deployHowMany(self, remainingTroops, country):
+        print(country)
+        string = "You can deploy up to " + remainingTroops + " here, how many do you want to? "
+        troops = int(input(string))
+            if troops in range(1, remainingTroops+1):
+                country.addTroops(troops)
+                return remainingTroops - troops
+            else:
+                self.deployHowMany(remainingTroops, country)
+        
 
-    #Returns country and number of troops to be deployed there
+    #Returns number of troops leftover after deployment by calling deployHowMany
     def deployWhere(self, remainingTroops):
-        countryName = input("where do you want to deploy some troops? ")
+        countryName = input("What country do you want to deploy some troops to? ")
         country = self.findCountry(countryName)
         if country[0]:
-            string = "You can deploy up to " + remainingTroops + " here, how many do you want to? "
-            troops = int(input(string))
-            if troops in range(1, remainingTroops+1):
-                country[1].addTroops(troops)
-                return remainingTroops - troops
-        
+            return self.deployHowMany(remainingTroops, country[1])
+        else:
+            print("This is not an acceptable answer, please select from your occupied countries")
+            self.deployWhere(remainingTroops)
+            
 
     #Allows player to draft troops in fixed game
     def draftFixed(self):
@@ -406,43 +430,39 @@ class Player:
                 self.removeMatch(hasMatch)
             else:
                 print("Withour cards you have ", draftTroops, " troops to deploy")
-                if self.tradeIn(hasMatch()):
+                if self.tradeIn(hasMatch):
                     draftTroops += hasMatch[1]
                     self.removeMatch(hasMatch)
-        print("You now have ", draftTroops, " troops to deploy")
-        print("Where do you want to delpoy your troops?")
+        print("You are starting your turn with ", draftTroops, " troops to deploy")
+        print("Here is your board position!"
         print(self)
         while draftTroops > 0:
-
-            ################ Does this work?
             draftTroops = self.deployWhere(draftTroops)
             
-        ## ask where to deploy and deploy accordingly
-
-    
-
-##    #Allows player to draft troops in progressive game
-##    def draftProgressive(self):
-##        draftTroops = 0
-##        draftTroops += self.draftTroopsByCountries()
-##        draftTroops += self.draftTroopsByContinent()
-##        hasMatch = self.hasMatch()
-##        if hasMatch[0]:
-##            if len(self.getCards()) = 5:
-##                print("You have 5 cards, so you must trade in 3 for " + str(hasMatch[1]) + " troops")
-##                draftTroops += hasMatch[1]
-##                self.removeMatch(hasMatch)
-##            else:
-##                string = "Do you want to trade in three cards for " + str(hasMatch[1]) + " troops? (0 for no, 1 for yes): "
-##                tradeIn = bool(int(input(string)))
-##                if tradeIn:
-##                    draftTroops += hasMatch[1]
-##                    self.removeMatch(hasMatch)
-##        options = len(self.getCountriesOccupied()) - 1
-##        index = random.randint(0,options)
-##        country = self.getCountriesOccupied()[index]
-##        country.addTroops(draftTroops)
-##        return country
+        
+    #Allows player to draft troops in fixed game
+    def draftProgressive(self, game):
+        draftTroops = 0
+        draftTroops += self.draftTroopsByCountries()
+        draftTroops += self.draftTroopsByContinent()
+        hasMatch = self.hasMatch()
+        if hasMatch[0]:
+            setValue = game.setValue()
+            if len(self.getCards()) == 5:
+                print("You have 5 cards, so you must trade in 3 for " + setValue + " troops")
+                draftTroops += setValue
+                self.removeMatch(hasMatch)
+            else:
+                print("Withour cards you have ", draftTroops, " troops to deploy")
+                matchValue = [hasMatch[0], setValue]
+                if self.tradeIn(matchValue):
+                    draftTroops += setValue
+                    self.removeMatch(hasMatch)
+        print("You are starting your turn with ", draftTroops, " troops to deploy")
+        print("Here is your board position!")
+        print(self)
+        while draftTroops > 0:
+            draftTroops = self.deployWhere(draftTroops)
 
     
     #Returns list of invadable countries
@@ -605,7 +625,6 @@ class Country:
     ## North Africa
     ## Peru
     ## Venezuela
-
     
     def __str__(self):
         nearbyStr = ""
@@ -725,7 +744,7 @@ def progressiveGame(game):
                         print("Player ", player.getName(), " Has Been Terminated From The Board!")
                         game.removePlayer(player)
                     else:
-                        player.draftProgressive()
+                        player.draftProgressive(game)
                         player.attack()
                         player.fortify()
                 game.addTurn()
