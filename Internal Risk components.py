@@ -70,17 +70,20 @@ class Game:
 
     ## Gives each player a set of countries
     def initCountries(self):
-        for i in range(len(Game.Board)):
-            country = Game.Board[i]
-            index = i % len(Game.Players)
-            player = Game.Players[index]
+        board = self.getBoard()
+        for i in range(len(board)):
+            country = board[i]
+            players = self.getPlayers()
+            index = i % len(players)
+            player = players[index]
             country.setPlayerName(player.getName())
             player.addCountry(country)
             
     ## Adds remaining troops to each players' countries
     def addLeftoverTroops(self, troopCount):
-        for i in range(len(Game.Players)):
-            player = Game.Players[i]
+        players = self.getPlayers()
+        for i in range(len(players)):
+            player = players[i]
             remaining = troopCount - player.getTotalTroops()
             countries = player.getCountriesOccupied()
             numOfCountries = len(countries)
@@ -259,7 +262,7 @@ class Player:
 
     #Prints a list of countries
     def printCountryNames(self, countries):
-        for country in counrties:
+        for country in countries:
             print(country.getName())
 
     #Adds country to players list
@@ -401,7 +404,7 @@ class Player:
     #Returns number of troops leftover after deployment
     def deployHowMany(self, remainingTroops, country):
         print(country)
-        string = "You can deploy up to " + remainingTroops + " here, how many do you want to? "
+        string = "You can deploy up to " + str(remainingTroops) + " here, how many do you want to? "
         troops = int(input(string))
         if troops in range(1, remainingTroops+1):
             country.addTroops(troops)
@@ -438,7 +441,7 @@ class Player:
                     draftTroops += hasMatch[1]
                     self.removeMatch(hasMatch)
         print("You are starting your turn with ", draftTroops, " troops to deploy")
-        print("Here is your board position!"
+        print("Here is your board position!")
         print(self)
         while draftTroops > 0:
             draftTroops = self.deployWhere(draftTroops)
@@ -516,9 +519,9 @@ class Player:
     def defender(self, attacker, game):
         options = attacker.getNearbyCountryNames()
         owned = self.getOccupiedCountryNames()
-                for name in options:
-                    if name in owned:
-                        options.remove(name)
+        for name in options:
+            if name in owned:
+                options.remove(name)
         print("Here are your options for who to attack: ", options)
         defenderName = input("Who do you want to attack? ")
         if defenderName in options:
@@ -534,7 +537,7 @@ class Player:
 
 
     def attack(self, game):
-        options = self.getOccupiedCountries()
+        options = self.getCountriesOccupied()
         for country in options:
             if country.getNumOfTroops() == 1:
                 options.remove(country)
@@ -558,8 +561,12 @@ class Player:
             defender.setNumOfTroops(troops - 1)
             attacker.setNumOfTroops(1)
         else:
-            options = range(3,troops)
-            move = int(input("How many troops do you want to move? (", options, ")"))
+            string = "How many troops do you want to move? ("
+            for i in range(3,troops):
+                string.append(str(i))
+                string.append(", ")
+            string.append(")")
+            move = int(input(string))
             if move in options:
                 defender.setNumOfTroops(move)
                 attacker.setNumOfTroops(troops - move)
@@ -826,7 +833,7 @@ def main():
     else:
         game = Game(gameType)
         printPlayers(game)
-        print("The game ", gameType, " will now begin")
+        print("The ", gameType, " game will now begin")
 
         if gameType == gameOptions[0]: 
             progressiveGame(game)
