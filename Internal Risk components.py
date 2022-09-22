@@ -191,11 +191,16 @@ class Game:
         self.addCountry(madagascar)
 
     def numOfStartPlayers(self):
-        numOfPlayers =  int(input("How many players? (2-6 players allowed): "))
-        if numOfPlayers in range(2,6):
-            return numOfPlayers
+        numOfPlayers =  input("How many players? (2-6 players allowed): ")
+        if numOfPlayers.isdigit():
+            numOfPlayers = int(numOfPlayers)
+            if numOfPlayers in range(2,6):
+                return numOfPlayers
+            else:
+                print("Please pick a reasonable number of players\n")
+                self.numOfStartPlayers()
         else:
-            print("Please pick a reasonable number of players\n")
+            print("Please pick a number for the player count\n")
             self.numOfStartPlayers()
 
             
@@ -205,7 +210,7 @@ class Game:
     ## 3 players = 35
     ## 2 players = 40
     def numOfStartTroops(self, numOfPlayers):
-        return 50 - 5*numOfPlayers
+        return 50 - 5 * numOfPlayers
 
     
 
@@ -822,28 +827,31 @@ def randomGame(game):
             for player in players:
                 print(turn)
                 print(player)
-
-def main():
-    # Random autogenerates moves and uses progressive cards
+def gameType():
     gameType = input("What kind of game do you want to play? ('fixed', 'progressive' or 'random'): ")
     gameOptions = ['fixed', 'progressive', 'random']
-    if gameType not in gameOptions:
-        print(gameType, " is not an available option!")
-        main()
+    if gameType in gameOptions:
+        return gameType
     else:
-        game = Game(gameType)
-        printPlayers(game)
-        print("The ", gameType, " game will now begin")
+        print(gameType, " is not an available option!")
+        gameType()
+    
+def main():
+    # Random autogenerates moves and uses progressive cards
+    print("Welcome to Risk by Joshua Renault")
+    game = Game(gameType())
+    printPlayers(game)
+    print("The ", gameType, " game will now begin")
 
-        if gameType == gameOptions[0]: 
-            progressiveGame(game)
-            
+    if gameType == gameOptions[0]: 
+        progressiveGame(game)
+        
 
-        elif gameType == gameOptions[1]: 
-            fixedGame(game)
+    elif gameType == gameOptions[1]: 
+        fixedGame(game)
 
-        elif gameType == gameOptions[2]: 
-            randomGame(game)
+    elif gameType == gameOptions[2]: 
+        randomGame(game)
 
 
 main()
