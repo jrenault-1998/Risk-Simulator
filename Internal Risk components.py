@@ -244,10 +244,16 @@ class Player:
         self.__occupied.append(country)
 
     def isAlive(self):
-        if self.getTotalTroops() == 0:
-            return False
-        else:
-            return True
+        return not self.getTotalTroops() == 0
+
+    def findCountry(self):
+        countryName = input("What is the country name? ")
+        for country in self.getCountriesOccupied():
+            if country.getName() == countryName:
+                return country
+        print("The country you are looking for was not found")
+        self.findCountry()
+        
 
     #Returns number of troops added by country count
     def draftTroopsByCountries(self):
@@ -324,8 +330,12 @@ class Player:
                 return [False, 0]
         
     def draftTroopsByCards(self):
-        if self.hasMatch()[0]:
+        hasMatch = self.hasMatch()
+        if hasMatch[0]:
+            # ask if they want to trade
+        else:
 
+            
     def removeMatch(hasMatch):
         if hasMatch[0]:
             if hasMatch[1] == 10:
@@ -359,6 +369,74 @@ class Player:
         country = self.getCountriesOccupied()[index]
         country.addTroops(draftTroops)
         return country
+
+    
+    #Returns boolean answer to trade in cards or not
+    def tradeIn(self, hasMatch):
+        string = "Do you want to trade in three cards for " + str(hasMatch[1]) + " troops? (0 for no, 1 for yes): "
+        answer = int(input(string))
+        if answer == 0 or answer == 1:
+            return bool(answer)
+        else:
+            print("This is not an acceptable answer")
+            self.tradeIn(hasMatch)
+
+    #Returns country and number of troops to be deployed there
+    def deployWhere(self, remainingTroops):
+        country = input("where do you want to deploy some troops? ")
+        if country in self.getOccupiedCountryNames():
+            string = "You can deploy up to " + remainingTroops + " here, how many do you want to? "
+            troops = int(input(string))
+        
+
+    #Allows player to draft troops in fixed game
+    def draftFixed(self):
+        draftTroops = 0
+        draftTroops += self.draftTroopsByCountries()
+        draftTroops += self.draftTroopsByContinent()
+        hasMatch = self.hasMatch()
+        if hasMatch[0]:
+            if len(self.getCards()) = 5:
+                print("You have 5 cards, so you must trade in 3 for " + str(hasMatch[1]) + " troops")
+                draftTroops += hasMatch[1]
+                self.removeMatch(hasMatch)
+            else:
+                print("Withour cards you have ", draftTroops, " troops to deploy")
+                if self.tradeIn(hasMatch()):
+                    draftTroops += hasMatch[1]
+                    self.removeMatch(hasMatch)
+        print("You now have ", draftTroops, " troops to deploy")
+        print("Where do you want to delpoy your troops?")
+        print(self)
+        while draftTroops > 0:
+            self.deployWhere(draftTroops)
+            
+        ## ask where to deploy and deploy accordingly
+
+    
+
+##    #Allows player to draft troops in progressive game
+##    def draftProgressive(self):
+##        draftTroops = 0
+##        draftTroops += self.draftTroopsByCountries()
+##        draftTroops += self.draftTroopsByContinent()
+##        hasMatch = self.hasMatch()
+##        if hasMatch[0]:
+##            if len(self.getCards()) = 5:
+##                print("You have 5 cards, so you must trade in 3 for " + str(hasMatch[1]) + " troops")
+##                draftTroops += hasMatch[1]
+##                self.removeMatch(hasMatch)
+##            else:
+##                string = "Do you want to trade in three cards for " + str(hasMatch[1]) + " troops? (0 for no, 1 for yes): "
+##                tradeIn = bool(int(input(string)))
+##                if tradeIn:
+##                    draftTroops += hasMatch[1]
+##                    self.removeMatch(hasMatch)
+##        options = len(self.getCountriesOccupied()) - 1
+##        index = random.randint(0,options)
+##        country = self.getCountriesOccupied()[index]
+##        country.addTroops(draftTroops)
+##        return country
 
     
     #Returns list of invadable countries
