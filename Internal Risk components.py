@@ -403,11 +403,11 @@ class Player:
         print(country)
         string = "You can deploy up to " + remainingTroops + " here, how many do you want to? "
         troops = int(input(string))
-            if troops in range(1, remainingTroops+1):
-                country.addTroops(troops)
-                return remainingTroops - troops
-            else:
-                self.deployHowMany(remainingTroops, country)
+        if troops in range(1, remainingTroops+1):
+            country.addTroops(troops)
+            return remainingTroops - troops
+        else:
+            self.deployHowMany(remainingTroops, country)
         
 
     #Returns number of troops leftover after deployment by calling deployHowMany
@@ -428,7 +428,7 @@ class Player:
         draftTroops += self.draftTroopsByContinent()
         hasMatch = self.hasMatch()
         if hasMatch[0]:
-            if len(self.getCards()) = 5:
+            if len(self.getCards()) == 5:
                 print("You have 5 cards, so you must trade in 3 for " + str(hasMatch[1]) + " troops")
                 draftTroops += hasMatch[1]
                 self.removeMatch(hasMatch)
@@ -507,13 +507,13 @@ class Player:
         for country in options:
             optionNames.append(country.getName())
         if countryName in optionNames:
-            return self.findCountry(countryName)[1]         #This is a possible issue which stems from findCountry being a weird fcn
+            return self.findCountry(countryName)[1]         #This is a possible issue which stems from findCountry being a weird fcn returning a list
         else:
             print("That is not an option, please try again")
             self.attacker(options)
 
             
-    def defender(self, attacker):
+    def defender(self, attacker, game):
         options = attacker.getNearbyCountryNames()
         owned = self.getOccupiedCountryNames()
                 for name in options:
@@ -523,9 +523,13 @@ class Player:
         defenderName = input("Who do you want to attack? ")
         if defenderName in options:
             #Search the board for this person and their country
+            board = game.getBoard()
+            for country in board:
+                if country.getName() == defenderName:
+                    return country
         else:
             print("That is not an appropriate response")
-            self.defender(attacker)
+            self.defender(attacker, game)
         
 
 
@@ -546,60 +550,123 @@ class Player:
             print("You can't attack since you have no accessible troops")
         else:    
             attacker = self.attacker(options)
-            defender = self.defender(attacker)
-
-##        defender = input("Who are you attacking? ")
-##        if len(options) > 0:
-##            self.attackCountry(attackingCountry, defender)
-##        else:
-##            print("You can't attack from this base since you own all surrounding territories")
-##            self.attack(game)
-        
-##    def fortifyRandom(self):
-    
-##    def fortify(self):
-
+            defender = self.defender(attacker, game)
+            self.attackCountry(attacker, defender, game)
+            
+    def moveTroops(self, attacker, defender, troops):
+        if troops <= 4:
+            defender.setNumOfTroops(troops - 1)
+            attacker.setNumOfTroops(1)
+        else:
+            options = range(3,troops)
+            move = int(input("How many troops do you want to move? (", options, ")"))
+            if move in options:
+                defender.setNumOfTroops(move)
+                attacker.setNumOfTroops(troops - move)
+            else:
+                print("Error!!!! You need to pick an appropriate number of troops")
+                self.moveTroops(attacker, defender, troops)
             
     ## Simulates an attack and updates accordingly
-    def attackCountry(self, startCountry, defender):
-        for country in board:
-            if country.getName() == defender:
-                myTroops = startCountry.getNumOfTroops()
-                enemyTroops = country.getNumOfTroops()
-                result = whoWins(myTroops, enemyTroops)
+    def attackCountry(self, attacker, defender, game):
+            attackerTroops = attacker.getNumOfTroops()
+            defenderTroops = defender.getNumOfTroops()
+            result = self.whoWins(attackerTroops, defenderTroops)
+            if result[2]: ##Attacker wins
+                print("Attacker Wins!")
                 
-                if result[2]: ##Attacker wins
-
-                    ## Add country to our list
-                    self.addCountry(country)
+                ## Remove country from defender's list
+                defenderName = defender.getPlayerName()
+                for player in game.getPlayers():
+                    if defenderName == player.getName():
+                        player.removeCountry(defender)
+                        break
                     
-                    ## Remove country from defender's list
-                    defenderName = country.getPlayerName()
-                    for player in players:
-                        if defenderName == player.getName():
-                            player.removeCountry(country)
-                            break
+                ## Add country to our list
+                self.addCountry(defender)
+                
+                ## Add new owner to country
+                defender.setPlayerName(attacker.getPlayerName())
 
-                    ## Add new owner to country
-                    country.setPlayerName(startCountry.getPlayerName())
+                # Move associated troops
+                self.moveTroops(attacker, defender, result[0])
 
-                    # Move associated troops
-                    if myTroops <= 4:
-                        country.setNumOfTroops(result[0] - 1)
+            else: ##Defender wins
+                print("Defender Wins!")
+                defender.setNumOfTroops(result[1])
+                attacker.setNumOfTroops(result[0])
+
+    ## Takes in the enemy and our troop counts and returns list of final troop counts [attackerTroops, defenderTroops, Boolean]
+    def whoWins(self, attackerTroops, defenderTroops):
+        while defenderTroops > 0 and attackerTroops > 1:
+            d1 = random.randint(1,6)
+            d2 = random.randint(1,6)
+            d3 = random.randint(1,6)
+            d4 = random.randint(1,6)
+            d5 = random.randint(1,6)
+            myDice = [d1, d2, d3]
+            myDice.sort(reverse=True)
+            myTwoDice = [d1, d2]
+            myTwoDice.sort(reverse=True)
+            enemyDice = [d4, d5]
+            enemyDice.sort(reverse=True)
+
+            if attackerTroops > 3:
+                if defenderTroops > 1:
+                    if myDice[0] > enemyDice[0]:
+                        defenderTroops -= 1
                     else:
-                        options = range(3,result[0])
-                        move = result[0] - 1
-                        ## move = int(input("How many troops do you want to move? (", options, ")"))
-                        if move in options:
-                            country.setNumOfTroops(move)
-                            startCountry.setNumOfTroops(result[0] - move)
-                        else:
-                            return("Error!!!! You need to pick an appropriate number of troops")  #Want this to ask the question again
+                        attackerTroops -= 1
+                        
+                    if myDice[1] > enemyDice[1]:
+                        defenderTroops -= 1
+                    else:
+                        attackerTroops -= 1
+                else:
+                    if myDice[0] > d4:
+                        defenderTroops -= 1
+                    else:
+                        attackerTroops -= 1
+            elif attackerTroops == 3:
+                if defenderTroops > 1:
+                    if myTwoDice[0] > enemyDice[0]:
+                        defenderTroops -= 1
+                    else:
+                        attackerTroops -= 1
+                    if myTwoDice[1] > enemyDice[1]:
+                        defenderTroops -= 1
+                    else:
+                        attackerTroops -= 1
+                else:
+                    if myTwoDice[0] > d4:
+                        defenderTroops -= 1
+                    else:
+                        attackerTroops -= 1
+            elif attackerTroops == 2:
+                if defenderTroops > 1:
+                    if d1 > enemyDice[0]:
+                        defenderTroops -= 1
+                    else:
+                        attackerTroops -= 1
+                else:
+                    if d1 > d4:
+                        defenderTroops -= 1
+                    else:
+                        attackerTroops -= 1
+            else:
+                return ("IDK what happened, I thought we checked all the cases!!!")
+            
+        finalResult = [attackerTroops, defenderTroops]
+        ## True if attackerTroops won
+        if defenderTroops == 0:
+            finalResult[0] -= 1
+            finalResult.append(True)
+        else:
+            finalResult.append(False)
+        
+        return finalResult ##Final troop counts [attackerTroops, defenderTroops, Boolean]
 
-                else: ##Defender wins
-                    country.setNumOfTroops(result[1])
-                    startCountry.setNumOfTroops(result[0])                    
-                break
+
         
 ##    Displays
 ## Player: Josh
@@ -682,77 +749,6 @@ class Country:
         return"Country: %s \nRuler's Name: %s \nTroops Occupying: %d \nContinent: %s \nNearby Countries: \n%s" \
                % (self.__name, self.__playerName, self.__numOfTroops, self.__continent, nearbyStr)
 
-## Takes in the enemy and our troop counts and returns list of final troop counts [myTroops, enemyTroops, Boolean]
-def whoWins(myTroops, enemyTroops):
-
-
-    while enemyTroops > 0 and myTroops > 1:
-        d1 = random.randint(1,6)
-        d2 = random.randint(1,6)
-        d3 = random.randint(1,6)
-        d4 = random.randint(1,6)
-        d5 = random.randint(1,6)
-        myDice = [d1, d2, d3]
-        myDice.sort(reverse=True)
-        myTwoDice = [d1, d2]
-        myTwoDice.sort(reverse=True)
-        enemyDice = [d4, d5]
-        enemyDice.sort(reverse=True)
-
-        if myTroops > 3:
-            if enemyTroops > 1:
-                if myDice[0] > enemyDice[0]:
-                    enemyTroops -= 1
-                else:
-                    myTroops -= 1
-                    
-                if myDice[1] > enemyDice[1]:
-                    enemyTroops -= 1
-                else:
-                    myTroops -= 1
-            else:
-                if myDice[0] > d4:
-                    enemyTroops -= 1
-                else:
-                    myTroops -= 1
-        elif myTroops == 3:
-            if enemyTroops > 1:
-                if myTwoDice[0] > enemyDice[0]:
-                    enemyTroops -= 1
-                else:
-                    myTroops -= 1
-                if myTwoDice[1] > enemyDice[1]:
-                    enemyTroops -= 1
-                else:
-                    myTroops -= 1
-            else:
-                if myTwoDice[0] > d4:
-                    enemyTroops -= 1
-                else:
-                    myTroops -= 1
-        elif myTroops == 2:
-            if enemyTroops > 1:
-                if d1 > enemyDice[0]:
-                    enemyTroops -= 1
-                else:
-                    myTroops -= 1
-            else:
-                if d1 > d4:
-                    enemyTroops -= 1
-                else:
-                    myTroops -= 1
-        else:
-            return ("IDK what happened, I thought we checked all the cases!!!")
-        
-    finalResult = [myTroops, enemyTroops]
-    ## True if myTroops won
-    if enemyTroops == 0:
-        finalResult[0] -= 1
-        finalResult.append(True)
-    else:
-        finalResult.append(False)
-    
-    return finalResult ##Final troop counts [myTroops, enemyTroops, Boolean]
 
 
 ## Prints board status by printing all players
@@ -777,7 +773,7 @@ def fixedGame(game):
                     else:
                         player.draftFixed()
                         player.attack(game)
-                        player.fortify()
+                        #player.fortify()
                 game.addTurn()
 
 #Play the progressive game to completion
@@ -795,7 +791,7 @@ def progressiveGame(game):
                     else:
                         player.draftProgressive(game)
                         player.attack(game)
-                        player.fortify()
+                        #player.fortify()
                 game.addTurn()
 
 #Autogenerate the random game to completion or to 500 turns printing the board status every 100 turns
