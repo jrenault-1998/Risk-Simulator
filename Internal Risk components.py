@@ -257,6 +257,10 @@ class Player:
         if country in self.__occupied:
             self.__occupied.remove(country)
 
+    #Prints a list of countries
+    def printCountryNames(self, countries):
+        for country in counrties:
+            print(country.getName())
 
     #Adds country to players list
     def addCountry(self, country):
@@ -493,18 +497,63 @@ class Player:
             self.attackCountry(attackingCountry, defender)
             ##Else, don't attack
 
-    def attack(self, attackingCountry):
-        options = self.invadableCountries(attackingCountry)
-        print("Here are your options: \n")
+            
+    #Asks for a country name from a list and returns the country
+    def attacker(self, options):
+        print("Here are your options for countries that you can attack with: \n")
+        self.printCountryNames(options)
+        countryName = input("What country do you want to attack with? ")
+        optionNames = []
         for country in options:
-            print(country)
-        defender = input("Who are you attacking? ")
-        if len(options) > 0:
-            index = random.randint(0, (len(options)-1))
-            defender = options[index]
-            self.attackCountry(attackingCountry, defender)
+            optionNames.append(country.getName())
+        if countryName in optionNames:
+            return self.findCountry(countryName)[1]         #This is a possible issue which stems from findCountry being a weird fcn
         else:
-            print("You can't attack from this base since you own all surrounding territories")
+            print("That is not an option, please try again")
+            self.attacker(options)
+
+            
+    def defender(self, attacker):
+        options = attacker.getNearbyCountryNames()
+        owned = self.getOccupiedCountryNames()
+                for name in options:
+                    if name in owned:
+                        options.remove(name)
+        print("Here are your options for who to attack: ", options)
+        defenderName = input("Who do you want to attack? ")
+        if defenderName in options:
+            #Search the board for this person and their country
+        else:
+            print("That is not an appropriate response")
+            self.defender(attacker)
+        
+
+
+    def attack(self, game):
+        options = self.getOccupiedCountries()
+        for country in options:
+            if country.getNumOfTroops() == 1:
+                options.remove(country)
+            else:
+                nearby = country.getNearbyCountryNames()
+                owned = self.getOccupiedCountryNames()
+                for name in nearby:
+                    if name in owned:
+                        nearby.remove(name)
+                if len(nearby) == 0:
+                    options.remove(country)
+        if len(options) == 0:
+            print("You can't attack since you have no accessible troops")
+        else:    
+            attacker = self.attacker(options)
+            defender = self.defender(attacker)
+
+##        defender = input("Who are you attacking? ")
+##        if len(options) > 0:
+##            self.attackCountry(attackingCountry, defender)
+##        else:
+##            print("You can't attack from this base since you own all surrounding territories")
+##            self.attack(game)
         
 ##    def fortifyRandom(self):
     
@@ -727,7 +776,7 @@ def fixedGame(game):
                         game.removePlayer(player)
                     else:
                         player.draftFixed()
-                        player.attack()
+                        player.attack(game)
                         player.fortify()
                 game.addTurn()
 
@@ -745,7 +794,7 @@ def progressiveGame(game):
                         game.removePlayer(player)
                     else:
                         player.draftProgressive(game)
-                        player.attack()
+                        player.attack(game)
                         player.fortify()
                 game.addTurn()
 
@@ -764,7 +813,7 @@ def randomGame(game):
             else:
                 countryDrafted = player.draftRandom()
                 player.attackRandom(countryDrafted)
-                player.fortifyRandom()
+                ## player.fortifyRandom()
         game.addTurn()
         if turn in [100,200,300,400,500]:
             for player in players:
