@@ -246,13 +246,13 @@ class Player:
     def isAlive(self):
         return not self.getTotalTroops() == 0
 
-    def findCountry(self):
-        countryName = input("What is the country name? ")
+    #Returns list where first element is bool (True if found) second element is the country found
+    def findCountry(self, countryName):
         for country in self.getCountriesOccupied():
             if country.getName() == countryName:
-                return country
+                return [True, country]
         print("The country you are looking for was not found")
-        self.findCountry()
+        return [False]
         
 
     #Returns number of troops added by country count
@@ -383,10 +383,14 @@ class Player:
 
     #Returns country and number of troops to be deployed there
     def deployWhere(self, remainingTroops):
-        country = input("where do you want to deploy some troops? ")
-        if country in self.getOccupiedCountryNames():
+        countryName = input("where do you want to deploy some troops? ")
+        country = self.findCountry(countryName)
+        if country[0]:
             string = "You can deploy up to " + remainingTroops + " here, how many do you want to? "
             troops = int(input(string))
+            if troops in range(1, remainingTroops+1):
+                country[1].addTroops(troops)
+                return remainingTroops - troops
         
 
     #Allows player to draft troops in fixed game
@@ -409,7 +413,9 @@ class Player:
         print("Where do you want to delpoy your troops?")
         print(self)
         while draftTroops > 0:
-            self.deployWhere(draftTroops)
+
+            ################ Does this work?
+            draftTroops = self.deployWhere(draftTroops)
             
         ## ask where to deploy and deploy accordingly
 
