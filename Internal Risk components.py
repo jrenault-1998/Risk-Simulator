@@ -444,11 +444,13 @@ class Player:
     #Allows player to draft troops in fixed game
     def draftFixed(self):
         draftTroops = 0
+        print("where are you?")
         draftTroops += self.draftTroopsByCountries()
         draftTroops += self.draftTroopsByContinent()
-        print(draftTroops.type())
+        print("before or after?")
         hasMatch = self.hasMatch()
         if hasMatch[0]:
+            print("Has a match already?")
             if len(self.getCards()) == 5:
                 print("You have 5 cards, so you must trade in 3 for " + str(hasMatch[1]) + " troops")
                 draftTroops += hasMatch[1]
@@ -458,6 +460,7 @@ class Player:
                 if self.tradeIn(hasMatch):
                     draftTroops += hasMatch[1]
                     self.removeMatch(hasMatch)
+        print("IDK bro")
         print("You are starting your turn with ", draftTroops, " troops to deploy")
         print("Here is your board position!")
         print(self)
@@ -532,7 +535,7 @@ class Player:
             return self.findCountry(countryName)[1]         #This is a possible issue which stems from findCountry being a weird fcn returning a list
         else:
             print("That is not an option, please try again")
-            self.attacker(options)
+            return self.attacker(options)
 
             
     def defender(self, attacker, game):
@@ -554,7 +557,7 @@ class Player:
                     return country
         else:
             print("That is not an appropriate response")
-            self.defender(attacker, game)
+            return self.defender(attacker, game)
         
 
 
@@ -587,14 +590,15 @@ class Player:
             for i in range(3,troops):
                 string += str(i)
                 string += ", "
+            string = string[:-2]
             string += ")"
             move = int(input(string))
-            if move in options:
+            if move in range(3,troops):
                 defender.setNumOfTroops(move)
                 attacker.setNumOfTroops(troops - move)
             else:
                 print("Error!!!! You need to pick an appropriate number of troops")
-                self.moveTroops(attacker, defender, troops)
+                return self.moveTroops(attacker, defender, troops)
             
     ## Simulates an attack and updates accordingly
     def attackCountry(self, attacker, defender, game):
@@ -809,10 +813,10 @@ def fixedGame(game):
                         game.removePlayer(player)
                     else:
                         player.draftFixed()
-                        print("draft done")
                         attackBool = attackDecision()
                         while attackBool:  
                             player.attack(game)
+                            attackBool = attackDecision()
                         #player.fortify()
                 game.addTurn()
 
@@ -834,6 +838,7 @@ def progressiveGame(game):
                         attackBool = attackDecision()
                         while attackBool:  
                             player.attack(game)
+                            attackBool = attackDecision()
                         #player.fortify()
                 game.addTurn()
 
