@@ -444,10 +444,8 @@ class Player:
     #Allows player to draft troops in fixed game
     def draftFixed(self):
         draftTroops = 0
-        print("where are you?")
         draftTroops += self.draftTroopsByCountries()
         draftTroops += self.draftTroopsByContinent()
-        print("before or after?")
         hasMatch = self.hasMatch()
         if hasMatch[0]:
             print("Has a match already?")
@@ -460,7 +458,6 @@ class Player:
                 if self.tradeIn(hasMatch):
                     draftTroops += hasMatch[1]
                     self.removeMatch(hasMatch)
-        print("IDK bro")
         print("You are starting your turn with ", draftTroops, " troops to deploy")
         print("Here is your board position!")
         print(self)
