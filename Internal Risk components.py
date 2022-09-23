@@ -410,7 +410,7 @@ class Player:
             return bool(answer)
         else:
             print("This is not an acceptable answer")
-            self.tradeIn(hasMatch)
+            return self.tradeIn(hasMatch)
             
     #Returns number of troops leftover after deployment
     def deployHowMany(self, remainingTroops, country):
@@ -421,12 +421,13 @@ class Player:
             troops = int(troops)
             if troops in range(1, remainingTroops+1):
                 country.addTroops(troops)
-                return remainingTroops - troops
+                leftover = remainingTroops - troops
+                return leftover
             else:
-                self.deployHowMany(remainingTroops, country)
+                return self.deployHowMany(remainingTroops, country)
         else:
             print("Please choose a number")
-            self.deployHowMany(remainingTroops, country)
+            return self.deployHowMany(remainingTroops, country)
         
 
     #Returns number of troops leftover after deployment by calling deployHowMany
@@ -437,7 +438,7 @@ class Player:
             return self.deployHowMany(remainingTroops, country[1])
         else:
             print("This is not an acceptable answer, please select from your occupied countries")
-            self.deployWhere(remainingTroops)
+            return self.deployWhere(remainingTroops)
             
 
     #Allows player to draft troops in fixed game
@@ -445,6 +446,7 @@ class Player:
         draftTroops = 0
         draftTroops += self.draftTroopsByCountries()
         draftTroops += self.draftTroopsByContinent()
+        print(draftTroops.type())
         hasMatch = self.hasMatch()
         if hasMatch[0]:
             if len(self.getCards()) == 5:
@@ -583,9 +585,9 @@ class Player:
         else:
             string = "How many troops do you want to move? ("
             for i in range(3,troops):
-                string.append(str(i))
-                string.append(", ")
-            string.append(")")
+                string += str(i)
+                string += ", "
+            string += ")"
             move = int(input(string))
             if move in options:
                 defender.setNumOfTroops(move)
@@ -776,7 +778,23 @@ class Country:
         return"Country: %s \nRuler's Name: %s \nTroops Occupying: %d \nContinent: %s \nNearby Countries: \n%s" \
                % (self.__name, self.__playerName, self.__numOfTroops, self.__continent, nearbyStr)
 
+    
+#Asks if player wants to attack
+def attackDecision():
+    string = "Do you want to attack a country? (0 for no, 1 for yes): "
+    answer = input(string)
+    if answer.isdigit():
+        answer = int(answer)
+        if answer == 0 or answer == 1:
+            return bool(answer)
+        else:
+            print("This is not an acceptable number")
+            return attackDecision()
+    else:
+        print("Please choose a number")
+        return attackDecision()
 
+    
 #Play the fixed game to completion
 def fixedGame(game):
     while len(game.getPlayers()) > 1:
@@ -791,7 +809,10 @@ def fixedGame(game):
                         game.removePlayer(player)
                     else:
                         player.draftFixed()
-                        player.attack(game)
+                        print("draft done")
+                        attackBool = attackDecision()
+                        while attackBool:  
+                            player.attack(game)
                         #player.fortify()
                 game.addTurn()
 
@@ -809,7 +830,10 @@ def progressiveGame(game):
                         game.removePlayer(player)
                     else:
                         player.draftProgressive(game)
-                        player.attack(game)
+                        print("draft done")
+                        attackBool = attackDecision()
+                        while attackBool:  
+                            player.attack(game)
                         #player.fortify()
                 game.addTurn()
 
@@ -841,7 +865,7 @@ def gameType():
         return gameOption
     else:
         print(gameOption, " is not an available option!")
-        gameType()
+        return gameType()
     
 def main():
     # Random autogenerates moves and uses progressive cards
