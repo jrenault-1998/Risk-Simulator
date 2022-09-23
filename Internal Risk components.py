@@ -42,6 +42,12 @@ class Game:
     def addSet(self):
         self.__sets += 1
 
+    ## Prints board status by printing all players
+    def printPlayers(self):
+        players = self.getPlayers()
+        for i in range(len(players)):
+            print(players[i])
+
     #Returns value of next set in a progressive game        
     def setValue(self, game):
         setNumber = self.getSets()
@@ -410,11 +416,16 @@ class Player:
     def deployHowMany(self, remainingTroops, country):
         print(country)
         string = "You can deploy up to " + str(remainingTroops) + " here, how many do you want to? "
-        troops = int(input(string))
-        if troops in range(1, remainingTroops+1):
-            country.addTroops(troops)
-            return remainingTroops - troops
+        troops = input(string)
+        if troops.isdigit():
+            troops = int(troops)
+            if troops in range(1, remainingTroops+1):
+                country.addTroops(troops)
+                return remainingTroops - troops
+            else:
+                self.deployHowMany(remainingTroops, country)
         else:
+            print("Please choose a number")
             self.deployHowMany(remainingTroops, country)
         
 
@@ -457,6 +468,7 @@ class Player:
         draftTroops = 0
         draftTroops += self.draftTroopsByCountries()
         draftTroops += self.draftTroopsByContinent()
+        print(int(draftTroops))
         hasMatch = self.hasMatch()
         if hasMatch[0]:
             setValue = game.setValue()
@@ -534,6 +546,9 @@ class Player:
             board = game.getBoard()
             for country in board:
                 if country.getName() == defenderName:
+                    print(attacker)
+                    print("Is Attacking")
+                    print(country)
                     return country
         else:
             print("That is not an appropriate response")
@@ -762,14 +777,6 @@ class Country:
                % (self.__name, self.__playerName, self.__numOfTroops, self.__continent, nearbyStr)
 
 
-
-## Prints board status by printing all players
-def printPlayers(game):
-    players = game.getPlayers()
-    for i in range(len(players)):
-        print(players[i])
-
-        
 #Play the fixed game to completion
 def fixedGame(game):
     while len(game.getPlayers()) > 1:
@@ -828,29 +835,29 @@ def randomGame(game):
                 print(turn)
                 print(player)
 def gameType():
-    gameType = input("What kind of game do you want to play? ('fixed', 'progressive' or 'random'): ")
+    gameOption = input("What kind of game do you want to play? ('fixed', 'progressive' or 'random'): ")
     gameOptions = ['fixed', 'progressive', 'random']
-    if gameType in gameOptions:
-        return gameType
+    if gameOption in gameOptions:
+        return gameOption
     else:
-        print(gameType, " is not an available option!")
+        print(gameOption, " is not an available option!")
         gameType()
     
 def main():
     # Random autogenerates moves and uses progressive cards
     print("Welcome to Risk by Joshua Renault")
-    game = Game(gameType())
-    printPlayers(game)
-    print("The ", gameType, " game will now begin")
-
-    if gameType == gameOptions[0]: 
+    gameChoice = gameType()
+    game = Game(gameChoice)
+    game.printPlayers()
+    print("The ", gameChoice, " game will now begin")
+    gameOptions = ['fixed', 'progressive', 'random']
+    if gameChoice == gameOptions[0]:
         progressiveGame(game)
-        
 
-    elif gameType == gameOptions[1]: 
+    elif gameChoice == gameOptions[1]: 
         fixedGame(game)
 
-    elif gameType == gameOptions[2]: 
+    elif gameChoice == gameOptions[2]: 
         randomGame(game)
 
 
