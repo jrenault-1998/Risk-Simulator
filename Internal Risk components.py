@@ -749,10 +749,6 @@ class Player:
                                 toBeChecked.append(name)
                         
         return endOptions
-            
-            
-        
-        
 
 
     def fortifyEnd(self, endOptions):
