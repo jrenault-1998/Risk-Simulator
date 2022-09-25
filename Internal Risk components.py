@@ -16,8 +16,6 @@ class Game:
         self.initPlayers(numOfPlayers)
         self.initCountries()
         self.addLeftoverTroops(troopCount)
-        
-
     def getPlayers(self):
         return self.__players
 
@@ -696,6 +694,87 @@ class Player:
         
         return finalResult ##Final troop counts [attackerTroops, defenderTroops, Boolean]
 
+    def startOptionsFortify(self):
+        countries = self.getCountriesOccupied()
+        options = []
+        for country in countries:
+            if country.getTroops() > 1:
+                options.append(country)
+        countryNames = self.getOccupiedCountryNames()
+        for country in options:
+            hasNearby = False
+            surrounding = country.getNearbyCountryNames()
+            for surroundingCountry in surrounding:
+                if surroundingCountry in countryNames:
+                    hasNearby = True
+                    break
+            if not hasNearby:
+                options.remove(country)
+        return options
+
+
+                
+    def fortifyStart(self, startOptions):
+        print("Here are you options for countries to fortify from: ")
+        countryNames = []
+        for country in startOptions:
+            countryNames.append(country.getName())
+            print(country)
+        startCountryName = input("What country would you like to fortify from? ")
+        if startCountryName in countryNames:
+            for country in startOptions:
+                if country.getName() == startCountryName:
+                    return country
+        else:
+            print("Please pick from the list printed.")
+            return self.fortifyStart(startOptions)
+
+
+
+    def endOptionsFortify(self, fortifyStart):
+        checked = []
+        endOptions = []
+        toBeChecked = []
+        for name in fortifyStart.getNearbyCountryNames():
+            toBeChecked.append(name)
+        while len(toBeChecked) > 0:
+            countryName = toBeChecked.pop(0)
+            
+            
+            country.getNearbyCountryNames()
+            
+            
+        
+        
+
+
+    def fortifyEnd(self, endOptions):
+        print("Here are you options for countries to fortify to: ")
+        countryNames = []
+        for country in endOptions:
+            countryNames.append(country.getName())
+            print(country)
+        endCountryName = input("What country would you like to fortify to? ")
+        if endCountryName in countryNames:
+            for country in endOptions:
+                if country.getName() == endCountryName:
+                    return country
+        else:
+            print("Please pick from the list printed.")
+            return self.fortifyEnd(endOptions)
+
+
+
+    def fortify(self, game):
+        answer = fortifyDecision()
+        #True if want to fortify
+        if answer:
+            startOptions = self.startOptionsFortify()
+            fortifyStart = self.fortifyStart(startOptions)
+            ## endOptions = self.endOptionsFortify(fortifyStart)
+            fortifyEnd = self.fortifyEnd(endOptions)
+            
+
 
         
 ##    Displays
@@ -779,6 +858,22 @@ class Country:
         return"Country: %s \nRuler's Name: %s \nTroops Occupying: %d \nContinent: %s \nNearby Countries: \n%s" \
                % (self.__name, self.__playerName, self.__numOfTroops, self.__continent, nearbyStr)
 
+
+#Asks if player wants to fortify
+def fortifyDecision():
+    string = "Do you want to fortify any troops? (0 for no, 1 for yes): "
+    answer = input(string)
+    if answer.isdigit():
+        answer = int(answer)
+        if answer == 0 or answer == 1:
+            return bool(answer)
+        else:
+            print("This is not an acceptable number")
+            return fortifyDecision()
+    else:
+        print("Please choose a number")
+        return fortifyDecision()
+
     
 #Asks if player wants to attack
 def attackDecision():
@@ -814,7 +909,7 @@ def fixedGame(game):
                         while attackBool:  
                             player.attack(game)
                             attackBool = attackDecision()
-                        #player.fortify()
+                        player.fortify(game)
                 game.addTurn()
 
 #Play the progressive game to completion
@@ -836,7 +931,7 @@ def progressiveGame(game):
                         while attackBool:  
                             player.attack(game)
                             attackBool = attackDecision()
-                        #player.fortify()
+                        player.fortify(game)
                 game.addTurn()
 
 #Autogenerate the random game to completion or to 500 turns printing the board status every 100 turns
