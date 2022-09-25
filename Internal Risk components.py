@@ -739,7 +739,12 @@ class Player:
             toBeChecked.append(name)
         while len(toBeChecked) > 0:
             countryName = toBeChecked.pop(0)
-            
+            if countryName not in checked:
+                for country in self.getCountriesOccupied():
+                    if countryName == country.getName():
+                        
+                    
+                ## get the country and go again
             
             country.getNearbyCountryNames()
             
