@@ -698,7 +698,7 @@ class Player:
         countries = self.getCountriesOccupied()
         options = []
         for country in countries:
-            if country.getTroops() > 1:
+            if country.getNumOfTroops() > 1:
                 options.append(country)
         countryNames = self.getOccupiedCountryNames()
         for country in options:
@@ -730,23 +730,25 @@ class Player:
             return self.fortifyStart(startOptions)
 
 
-
+    #Returns all possible countries connected via single path to fortifyStart
     def endOptionsFortify(self, fortifyStart):
         checked = []
-        endOptions = []
         toBeChecked = []
+        endOptions = []
         for name in fortifyStart.getNearbyCountryNames():
             toBeChecked.append(name)
         while len(toBeChecked) > 0:
             countryName = toBeChecked.pop(0)
             if countryName not in checked:
-                for country in self.getCountriesOccupied():
-                    if countryName == country.getName():
+                checked.append(countryName)
+                if countryName in self.getOccupiedCountryNames():
+                    for country in self.getCountriesOccupied():
+                        if countryName == country.getName():
+                            endOptions.append(country)
+                            for name in country.getNearbyCountryNames():
+                                toBeChecked.append(name)
                         
-                    
-                ## get the country and go again
-            
-            country.getNearbyCountryNames()
+        return endOptions
             
             
         
@@ -768,16 +770,33 @@ class Player:
             print("Please pick from the list printed.")
             return self.fortifyEnd(endOptions)
 
+    def fortifyTroopCount(self, movableTroops):
+        print("you can move up to ", movableTroops, ". How many would you like to move? ")
+        troopCount = input("Please enter a number of troops to be moves: ")
+        if troopCount.isdigit():
+            troopCount = int(troopCount)
+            if troopCount in range(1, movableTroops+1):
+                return troopCount
+            else:
+                print("Please choose a number within the appropriate range")
+                return self.fortifyTroopCount(movableTroops)
+        else:
+            print("Please choose a number")
+            return self.fortifyTroopCount(movableTroops)
+        
 
-
-    def fortify(self, game):
+    def fortify(self):
         answer = fortifyDecision()
         #True if want to fortify
         if answer:
             startOptions = self.startOptionsFortify()
             fortifyStart = self.fortifyStart(startOptions)
-            ## endOptions = self.endOptionsFortify(fortifyStart)
+            endOptions = self.endOptionsFortify(fortifyStart)
             fortifyEnd = self.fortifyEnd(endOptions)
+            movableTroops = fortifyStart.getNumOfTroops() - 1
+            troopCount = self.fortifyTroopCount(movableTroops)
+            fortifyStart.removeTroops(troopCount)
+            fortifyEnd.addTroops(troopCount)
             
 
 
@@ -840,6 +859,9 @@ class Country:
 
     def addTroops(self, troops):
         self.__numOfTroops += troops
+
+    def removeTroops(self, troops):
+        self.__numOfTroops -= troops
     
 
 
@@ -914,7 +936,7 @@ def fixedGame(game):
                         while attackBool:  
                             player.attack(game)
                             attackBool = attackDecision()
-                        player.fortify(game)
+                        player.fortify()
                 game.addTurn()
 
 #Play the progressive game to completion
@@ -936,7 +958,7 @@ def progressiveGame(game):
                         while attackBool:  
                             player.attack(game)
                             attackBool = attackDecision()
-                        player.fortify(game)
+                        player.fortify()
                 game.addTurn()
 
 #Autogenerate the random game to completion or to 500 turns printing the board status every 100 turns
