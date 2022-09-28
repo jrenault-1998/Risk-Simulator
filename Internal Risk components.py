@@ -1,8 +1,13 @@
+#Imports all required packages
 import math
 import random
 
+
+# A class to hold all relevant Game information
 class Game:
 
+    #Constructor to generate Game object which consists of
+    #a game type, board, list of Players, turn and sets
     def __init__(self, gameType = ""):
         self.__gameType = gameType
         self.__board = []
@@ -16,87 +21,47 @@ class Game:
         self.initPlayers(numOfPlayers)
         self.initCountries()
         self.addLeftoverTroops(troopCount)
+
+    #Returns list of players    
     def getPlayers(self):
         return self.__players
 
+    #Returns list of countries which make up the board
     def getBoard(self):
         return self.__board
-
+    
+    #Returns turn number (starts at 1)
     def getTurn(self):
         return self.__turn
 
+    #Returns number of sets traded in thus far (starts at 0)
     def getSets(self):
         return self.__sets
 
+    #Appends Country to the Board
     def addCountry(self, country):
         self.__board.append(country)
 
+    #Removes Player from the game (called if all territories are conquered)
     def removePlayer(self, player):
         self.__players.remove(player)
 
+    #Adds 1 to turn count
     def addTurn(self):
         self.__turn += 1
 
+    #Adds 1 to set count
     def addSet(self):
         self.__sets += 1
 
-    ## Prints board status by printing all players
+    #Prints board status by printing all players
     def printPlayers(self):
         players = self.getPlayers()
         for i in range(len(players)):
             print(players[i])
 
-    #Returns value of next set in a progressive game        
-    def setValue(self, game):
-        setNumber = self.getSets()
-        if setNumber == 0:
-            return 4
-        elif setNumber == 1:
-            return 6
-        elif setNumber == 2:
-            return 8
-        elif setNumber == 3:
-            return 10
-        elif setNumber == 4:
-            return 12
-        elif setNumber > 4:
-            return 5*(setNumber-2)
-        else:
-            print("Somehow set values got negative!!!!")
-            return 0
-
-    ## Initialize Players
-    def initPlayers(self, numOfPlayers):
-        for i in range(numOfPlayers):
-            playerNumber = str(i+1)
-            name = input("What is the name of player " + playerNumber + "? ")
-            self.__players.append(Player(name, []))
-
-    ## Gives each player a set of countries
-    def initCountries(self):
-        board = self.getBoard()
-        for i in range(len(board)):
-            country = board[i]
-            players = self.getPlayers()
-            index = i % len(players)
-            player = players[index]
-            country.setPlayerName(player.getName())
-            player.addCountry(country)
-            
-    ## Adds remaining troops to each players' countries
-    def addLeftoverTroops(self, troopCount):
-        players = self.getPlayers()
-        for i in range(len(players)):
-            player = players[i]
-            remaining = troopCount - player.getTotalTroops()
-            countries = player.getCountriesOccupied()
-            numOfCountries = len(countries)
-            for j in range(remaining):
-                index = random.randint(0,(numOfCountries - 1))
-                countries[index].addTroop()
-
+    #Generates all countries for the classic risk board and appends them to the board list
     def boardInitializer(self):
-        ##Country variables are created
         brazil = Country("Brazil", "", 1, "South America", ["Argentina", "North Africa", "Peru", "Venezuela"])
         venezuela = Country("Venezuela", "", 1, "South America", ["Central America", "Brazil", "Peru"])
         peru = Country("Peru", "", 1, "South America", ["Argentina", "Brazil", "Venezuela"])
@@ -194,6 +159,7 @@ class Game:
         self.addCountry(southAfrica)
         self.addCountry(madagascar)
 
+    #Asks user to select number of Players for this game
     def numOfStartPlayers(self):
         numOfPlayers =  input("How many players? (2-6 players allowed): ")
         if numOfPlayers.isdigit():
@@ -207,43 +173,90 @@ class Game:
             print("Please pick a number for the player count\n")
             self.numOfStartPlayers()
 
-            
-    ## 6 players = 20 troops
-    ## 5 players = 25
-    ## 4 players = 30
-    ## 3 players = 35
-    ## 2 players = 40
+    #Returns number of starting troops for each Player according to the board game's rules
     def numOfStartTroops(self, numOfPlayers):
         return 50 - 5 * numOfPlayers
 
+    #Initialize Players by getting their names
+    def initPlayers(self, numOfPlayers):
+        for i in range(numOfPlayers):
+            playerNumber = str(i+1)
+            name = input("What is the name of player " + playerNumber + "? ")
+            self.__players.append(Player(name, []))
+
+    #Generates a set of countries for each player
+    def initCountries(self):
+        board = self.getBoard()
+        for i in range(len(board)):
+            country = board[i]
+            players = self.getPlayers()
+            index = i % len(players)
+            player = players[index]
+            country.setPlayerName(player.getName())
+            player.addCountry(country)
+            
+    #Adds remaining troops to each Players' countries
+    def addLeftoverTroops(self, troopCount):
+        players = self.getPlayers()
+        for i in range(len(players)):
+            player = players[i]
+            remaining = troopCount - player.getTotalTroops()
+            countries = player.getCountriesOccupied()
+            numOfCountries = len(countries)
+            for j in range(remaining):
+                index = random.randint(0,(numOfCountries - 1))
+                countries[index].addTroop()
+
+    #Returns troop value of next set in a progressive game (4,6,8,10,12,15,20,...)      
+    def setValue(self, game):
+        setNumber = self.getSets()
+        if setNumber == 0:
+            return 4
+        elif setNumber == 1:
+            return 6
+        elif setNumber == 2:
+            return 8
+        elif setNumber == 3:
+            return 10
+        elif setNumber == 4:
+            return 12
+        elif setNumber > 4:
+            return 5*(setNumber-2)
+        else:
+            print("Set values negative, set value is now worth zero \n\t*This is a coding error*")
+            return 0
     
 
-#A player consists of a name, number and a list of countries
+#A class to hold all relevant Player information
+#This class consists of all functions for a Player to play their turn
 class Player:
+    
     # Class variables
     NextNumber = 1
 
 
-    #Initializes a Player
-
-
+    #Constructor to generate Player object which consists of
+    #a name, number, list of occupied countries and a list of cards
     def __init__(self, name="N/A", occupied=[]):
-        
         self.__name = name
         self.__number = Player.NextNumber
         self.__occupied = occupied
         Player.NextNumber += 1
         self.__cards = []
 
+    #Returns Player's name
     def getName(self):
         return self.__name
 
+    #Returns Player's number
     def getNumber(self):
         return self.__number
 
+    #Returns list of Countries Player occupies
     def getCountriesOccupied(self):
         return self.__occupied
 
+    #Returns total number of troops Player has across all occupied countries
     def getTotalTroops(self):
         totalTroops = 0
         for country in self.__occupied:
@@ -257,27 +270,30 @@ class Player:
             occupiedCountryNames.append(country.getName())
         return occupiedCountryNames
 
+    #Returns list of cards owned by Player
     def getCards(self):
         return self.__cards
 
+    #Gives Player a card
     def addCard(self):
         card = random.randint(1,3)
         self.__cards.append(card)
 
-    #Removes country from players list
+    #Removes Country from Player's list of occupied Countries
     def removeCountry(self, country):
         if country in self.__occupied:
             self.__occupied.remove(country)
 
-    #Prints a list of countries
+    #Prints a list of Countries
     def printCountryNames(self, countries):
         for country in countries:
             print(country.getName())
 
-    #Adds country to players list
+    #Adds Country to Player's list
     def addCountry(self, country):
         self.__occupied.append(country)
 
+    #Returns true if the Player has a non-zero troop count
     def isAlive(self):
         return not self.getTotalTroops() == 0
 
@@ -288,8 +304,9 @@ class Player:
                 return [True, country]
         print("The country you are looking for was not found")
         return [False]
-        
 
+###  Draft Functions  ###
+        
     #Returns number of troops added by country count
     def draftTroopsByCountries(self):
         numOfCountries = len(self.getCountriesOccupied())
@@ -298,7 +315,7 @@ class Player:
         else:
             return numOfCountries // 3
 
-
+    #Returns list containing number of Countries owned in each continent
     def getContinentCount(self):
         ## lst: [SA, NA, Asia, Oceania, Europe, Africa]
         continentCount = [0,0,0,0,0,0]
@@ -315,9 +332,7 @@ class Player:
                 continentCount[4] += 1
             elif country.getContinent() == "Africa":
                 continentCount[5] += 1
-
         return continentCount
-
     
     def draftTroopsByContinent(self):
         additionalTroops = 0
@@ -488,6 +503,7 @@ class Player:
         while draftTroops > 0:
             draftTroops = self.deployWhere(draftTroops)
 
+###  Attack Functions  ###
     
     #Returns list of invadable countries
     def invadableCountries(self, country):
@@ -506,7 +522,7 @@ class Player:
         if len(options) > 0:
             index = random.randint(0, (len(options)-1))
             defender = options[index]
-            self.attackCountry(attackingCountry, defender)
+            self.blitz(attackingCountry, defender)
             ##Else, don't attack    
         
     def attackRandom(self, attackingCountry):
@@ -514,7 +530,7 @@ class Player:
         if len(options) > 0:
             index = random.randint(0, (len(options)-1))
             defender = options[index]
-            self.attackCountry(attackingCountry, defender)
+            self.blitz(attackingCountry, defender)
             ##Else, don't attack
 
             
@@ -574,7 +590,8 @@ class Player:
         else:    
             attacker = self.attacker(options)
             defender = self.defender(attacker, game)
-            self.attackCountry(attacker, defender, game)
+            self.blitz(attacker, defender, game)
+
             
     def moveTroops(self, attacker, defender, troops):
         if troops <= 4:
@@ -596,10 +613,10 @@ class Player:
                 return self.moveTroops(attacker, defender, troops)
             
     ## Simulates an attack and updates accordingly
-    def attackCountry(self, attacker, defender, game):
+    def blitz(self, attacker, defender, game):
             attackerTroops = attacker.getNumOfTroops()
             defenderTroops = defender.getNumOfTroops()
-            result = self.whoWins(attackerTroops, defenderTroops)
+            result = self.blitzWinner(attackerTroops, defenderTroops)
             if result[2]: ##Attacker wins
                 print("Attacker Wins!")
                 
@@ -625,7 +642,7 @@ class Player:
                 attacker.setNumOfTroops(result[0])
 
     ## Takes in the enemy and our troop counts and returns list of final troop counts [attackerTroops, defenderTroops, Boolean]
-    def whoWins(self, attackerTroops, defenderTroops):
+    def blitzWinner(self, attackerTroops, defenderTroops):
         while defenderTroops > 0 and attackerTroops > 1:
             d1 = random.randint(1,6)
             d2 = random.randint(1,6)
@@ -694,6 +711,8 @@ class Player:
         
         return finalResult ##Final troop counts [attackerTroops, defenderTroops, Boolean]
 
+###  Fortify Functions  ###
+
     def startOptionsFortify(self):
         countries = self.getCountriesOccupied()
         options = []
@@ -737,6 +756,7 @@ class Player:
         endOptions = []
         for name in fortifyStart.getNearbyCountryNames():
             toBeChecked.append(name)
+            checked.append(fortifyStart.getName())
         while len(toBeChecked) > 0:
             countryName = toBeChecked.pop(0)
             if countryName not in checked:
