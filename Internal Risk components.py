@@ -307,7 +307,7 @@ class Player:
 
 ###  Draft Functions  ###
         
-    #Returns number of troops added by country count
+    #Returns number of troops added by number of Countries occupied
     def draftTroopsByCountries(self):
         numOfCountries = len(self.getCountriesOccupied())
         if numOfCountries < 12:
@@ -333,30 +333,29 @@ class Player:
             elif country.getContinent() == "Africa":
                 continentCount[5] += 1
         return continentCount
-    
+
+    #Returns number of troops added due to Player holding continents
     def draftTroopsByContinent(self):
         additionalTroops = 0
         continentCount = self.getContinentCount()
-
         #SA
         if continentCount[0] == 4:
             additionalTroops += 2
         #NA
-        elif continentCount[1] == 9:
+        if continentCount[1] == 9:
             additionalTroops += 5
         #Asia
-        elif continentCount[2] == 12:
+        if continentCount[2] == 12:
             additionalTroops += 7
         #Oceania
-        elif continentCount[3] == 4:
+        if continentCount[3] == 4:
             additionalTroops += 2
         #Europe
-        elif continentCount[4] == 7:
+        if continentCount[4] == 7:
             additionalTroops += 5
         #Africa
-        elif continentCount[5] == 6:
+        if continentCount[5] == 6:
             additionalTroops += 3
-
         return additionalTroops
 
     #Returns match information ([Bool, Num] = [True if has match, Max match value])
@@ -372,9 +371,9 @@ class Player:
                 return [True, 10]
             elif threes > 2:
                 return [True, 8]
-            elif threes > 2:
+            elif twos > 2:
                 return [True, 6]
-            elif threes > 2:
+            elif ones > 2:
                 return [True, 4]
             else:
                 return [False, 0]
@@ -398,7 +397,100 @@ class Player:
                 self.__cards.remove(1)
                 self.__cards.remove(1)
                 self.__cards.remove(1)
-   
+        else:
+            print("Player didn't have a removable match")
+
+    #Returns boolean answer to trade in cards or not
+    def tradeIn(self, hasMatch):
+        string = "Do you want to trade in three cards for " + str(hasMatch[1]) + " troops? (0 for no, 1 for yes): "
+        if string.isdigit():
+            answer = int(string)    
+            if answer == 0 or answer == 1:
+                return bool(answer)
+            else:
+                print("This is not an acceptable number")
+                return self.tradeIn(hasMatch)
+        else:
+                print("This is not an acceptable answer")
+                return self.tradeIn(hasMatch)
+            
+    #Returns number of troops leftover after deployment
+    def deployHowMany(self, remainingTroops, country):
+        print(country)
+        string = "You can deploy up to " + str(remainingTroops) + " here, how many do you want to? "
+        troops = input(string)
+        if troops.isdigit():
+            troops = int(troops)
+            if troops in range(1, remainingTroops+1):
+                country.addTroops(troops)
+                leftover = remainingTroops - troops
+                return leftover
+            else:
+                print("Please choose an acceptable number of troops to deploy here")
+                return self.deployHowMany(remainingTroops, country)
+        else:
+            print("Please choose a number")
+            return self.deployHowMany(remainingTroops, country)
+        
+    #Returns number of troops leftover after deployment by calling deployHowMany
+    def deployWhere(self, remainingTroops):
+        self.printCountryNames()
+        countryName = input("What country do you want to deploy some troops to? ")
+        country = self.findCountry(countryName)
+        if country[0]:
+            return self.deployHowMany(remainingTroops, country[1])
+        else:
+            print("This is not an acceptable answer, please select from your occupied countries")
+            return self.deployWhere(remainingTroops)
+            
+    #Allows Player to draft troops in fixed game
+    def draftFixed(self):
+        draftTroops = 0
+        draftTroops += self.draftTroopsByCountries()
+        draftTroops += self.draftTroopsByContinent()
+        hasMatch = self.hasMatch()
+        if hasMatch[0]:
+            if len(self.getCards()) == 5:
+                print("You have 5 cards, so you must trade in 3 for " + str(hasMatch[1]) + " troops")
+                draftTroops += hasMatch[1]
+                self.removeMatch(hasMatch)
+            else:
+                print("Without cards you have ", draftTroops, " troops to deploy")
+                if self.tradeIn(hasMatch):
+                    draftTroops += hasMatch[1]
+                    self.removeMatch(hasMatch)
+        print("You are starting your turn with ", draftTroops, " troops to deploy")
+        print("Here is your board position!")
+        print(self)
+        while draftTroops > 0:
+            draftTroops = self.deployWhere(draftTroops)
+            
+        
+    #Allows Player to draft troops in fixed game
+    def draftProgressive(self, game):
+        draftTroops = 0
+        draftTroops += self.draftTroopsByCountries()
+        draftTroops += self.draftTroopsByContinent()
+        print(int(draftTroops))
+        hasMatch = self.hasMatch()
+        if hasMatch[0]:
+            setValue = game.setValue()
+            if len(self.getCards()) == 5:
+                print("You have 5 cards, so you must trade in 3 for " + setValue + " troops")
+                draftTroops += setValue
+                self.removeMatch(hasMatch)
+            else:
+                print("Without cards you have ", draftTroops, " troops to deploy")
+                matchValue = [hasMatch[0], setValue]
+                if self.tradeIn(matchValue):
+                    draftTroops += setValue
+                    self.removeMatch(hasMatch)
+        print("You are starting your turn with ", draftTroops, " troops to deploy")
+        print("Here is your board position!")
+        print(self)
+        while draftTroops > 0:
+            draftTroops = self.deployWhere(draftTroops)
+
     #Returns country drafted to
     def draftRandom(self):
         draftTroops = 0
@@ -413,95 +505,6 @@ class Player:
         country = self.getCountriesOccupied()[index]
         country.addTroops(draftTroops)
         return country
-
-    
-    #Returns boolean answer to trade in cards or not
-    def tradeIn(self, hasMatch):
-        string = "Do you want to trade in three cards for " + str(hasMatch[1]) + " troops? (0 for no, 1 for yes): "
-        answer = int(input(string))
-        if answer == 0 or answer == 1:
-            return bool(answer)
-        else:
-            print("This is not an acceptable answer")
-            return self.tradeIn(hasMatch)
-            
-    #Returns number of troops leftover after deployment
-    def deployHowMany(self, remainingTroops, country):
-        print(country)
-        string = "You can deploy up to " + str(remainingTroops) + " here, how many do you want to? "
-        troops = input(string)
-        if troops.isdigit():
-            troops = int(troops)
-            if troops in range(1, remainingTroops+1):
-                country.addTroops(troops)
-                leftover = remainingTroops - troops
-                return leftover
-            else:
-                return self.deployHowMany(remainingTroops, country)
-        else:
-            print("Please choose a number")
-            return self.deployHowMany(remainingTroops, country)
-        
-
-    #Returns number of troops leftover after deployment by calling deployHowMany
-    def deployWhere(self, remainingTroops):
-        countryName = input("What country do you want to deploy some troops to? ")
-        country = self.findCountry(countryName)
-        if country[0]:
-            return self.deployHowMany(remainingTroops, country[1])
-        else:
-            print("This is not an acceptable answer, please select from your occupied countries")
-            return self.deployWhere(remainingTroops)
-            
-
-    #Allows player to draft troops in fixed game
-    def draftFixed(self):
-        draftTroops = 0
-        draftTroops += self.draftTroopsByCountries()
-        draftTroops += self.draftTroopsByContinent()
-        hasMatch = self.hasMatch()
-        if hasMatch[0]:
-            print("Has a match already?")
-            if len(self.getCards()) == 5:
-                print("You have 5 cards, so you must trade in 3 for " + str(hasMatch[1]) + " troops")
-                draftTroops += hasMatch[1]
-                self.removeMatch(hasMatch)
-            else:
-                print("Withour cards you have ", draftTroops, " troops to deploy")
-                if self.tradeIn(hasMatch):
-                    draftTroops += hasMatch[1]
-                    self.removeMatch(hasMatch)
-        print("You are starting your turn with ", draftTroops, " troops to deploy")
-        print("Here is your board position!")
-        print(self)
-        while draftTroops > 0:
-            draftTroops = self.deployWhere(draftTroops)
-            
-        
-    #Allows player to draft troops in fixed game
-    def draftProgressive(self, game):
-        draftTroops = 0
-        draftTroops += self.draftTroopsByCountries()
-        draftTroops += self.draftTroopsByContinent()
-        print(int(draftTroops))
-        hasMatch = self.hasMatch()
-        if hasMatch[0]:
-            setValue = game.setValue()
-            if len(self.getCards()) == 5:
-                print("You have 5 cards, so you must trade in 3 for " + setValue + " troops")
-                draftTroops += setValue
-                self.removeMatch(hasMatch)
-            else:
-                print("Withour cards you have ", draftTroops, " troops to deploy")
-                matchValue = [hasMatch[0], setValue]
-                if self.tradeIn(matchValue):
-                    draftTroops += setValue
-                    self.removeMatch(hasMatch)
-        print("You are starting your turn with ", draftTroops, " troops to deploy")
-        print("Here is your board position!")
-        print(self)
-        while draftTroops > 0:
-            draftTroops = self.deployWhere(draftTroops)
 
 ###  Attack Functions  ###
     
@@ -817,7 +820,7 @@ class Player:
 
 
         
-##    Displays
+##    Displays (ex.)
 ## Player: Josh
 ## Number: 1
 ## Countries occupied:
@@ -840,8 +843,7 @@ class Player:
 class Country:
 
     def __init__(self, name="N/A", playerName="N/A", troops=0, continent="N/A", \
-                 nearbyCountryNames=[]):
-        
+                 nearbyCountryNames=[]):  
         self.__name = name
         self.__nearbyCountryNames = nearbyCountryNames
         self.__continent = continent
