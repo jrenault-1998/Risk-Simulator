@@ -168,10 +168,10 @@ class Game:
                 return numOfPlayers
             else:
                 print("Please pick a reasonable number of players\n")
-                self.numOfStartPlayers()
+                return self.numOfStartPlayers()
         else:
             print("Please pick a number for the player count\n")
-            self.numOfStartPlayers()
+            return self.numOfStartPlayers()
 
     #Returns number of starting troops for each Player according to the board game's rules
     def numOfStartTroops(self, numOfPlayers):
@@ -434,7 +434,7 @@ class Player:
         
     #Returns number of troops leftover after deployment by calling deployHowMany
     def deployWhere(self, remainingTroops):
-        self.printCountryNames()
+        self.printCountryNames(self.getCountriesOccupied())
         countryName = input("What country do you want to deploy some troops to? ")
         country = self.findCountry(countryName)
         if country[0]:
@@ -508,7 +508,7 @@ class Player:
 
 ###  Attack Functions  ###
     
-    #Returns list of invadable countries
+    #Takes in an occupied Country and returns list of invadable Countries
     def invadableCountries(self, country):
         occupiedCountryNames = self.getOccupiedCountryNames()
         nearbyCountries = country.getNearbyCountryNames()
@@ -516,18 +516,8 @@ class Player:
             if countryName in occupiedCountryNames:
                 nearbyCountries.remove(countryName)
         return nearbyCountries
-    
-    #Needs work
-    def attackDecision(self, attackingCountry):
-        options = self.invadableCountries(attackingCountry)
-        print("Here are your options: ", options)
-        defender = input("Who are you attacking? ")
-        if len(options) > 0:
-            index = random.randint(0, (len(options)-1))
-            defender = options[index]
-            self.blitz(attackingCountry, defender)
-            ##Else, don't attack    
-        
+
+
     def attackRandom(self, attackingCountry):
         options = self.invadableCountries(attackingCountry)
         if len(options) > 0:
@@ -572,28 +562,6 @@ class Player:
         else:
             print("That is not an appropriate response")
             return self.defender(attacker, game)
-        
-
-
-    def attack(self, game):
-        options = self.getCountriesOccupied()
-        for country in options:
-            if country.getNumOfTroops() == 1:
-                options.remove(country)
-            else:
-                nearby = country.getNearbyCountryNames()
-                owned = self.getOccupiedCountryNames()
-                for name in nearby:
-                    if name in owned:
-                        nearby.remove(name)
-                if len(nearby) == 0:
-                    options.remove(country)
-        if len(options) == 0:
-            print("You can't attack since you have no accessible troops")
-        else:    
-            attacker = self.attacker(options)
-            defender = self.defender(attacker, game)
-            self.blitz(attacker, defender, game)
 
             
     def moveTroops(self, attacker, defender, troops):
@@ -615,7 +583,7 @@ class Player:
                 print("Error!!!! You need to pick an appropriate number of troops")
                 return self.moveTroops(attacker, defender, troops)
             
-    ## Simulates an attack and updates accordingly
+    #Simulates a blitzed attack and updates accordingly
     def blitz(self, attacker, defender, game):
             attackerTroops = attacker.getNumOfTroops()
             defenderTroops = defender.getNumOfTroops()
@@ -711,8 +679,30 @@ class Player:
             finalResult.append(True)
         else:
             finalResult.append(False)
-        
         return finalResult ##Final troop counts [attackerTroops, defenderTroops, Boolean]
+    
+    #Runs the attack sequence by generating a list of Countries a Player can attack from
+    #Calls functions to select the attacking Country and the defending Country
+    def attack(self, game):
+        options = self.getCountriesOccupied()
+        for country in options:
+            if country.getNumOfTroops() == 1:
+                options.remove(country)
+            else:
+                nearby = country.getNearbyCountryNames()
+                owned = self.getOccupiedCountryNames()
+                for name in nearby:
+                    if name in owned:
+                        nearby.remove(name)
+                if len(nearby) == 0:
+                    options.remove(country)
+        if len(options) == 0:
+            print("You can't attack since you have no accessible troops")
+        else:    
+            attacker = self.attacker(options)
+            defender = self.defender(attacker, game)
+            #Call rollDecision()
+            self.blitz(attacker, defender, game)
 
 ###  Fortify Functions  ###
 
@@ -805,17 +795,14 @@ class Player:
         
 
     def fortify(self):
-        answer = fortifyDecision()
-        #True if want to fortify
-        if answer:
-            startOptions = self.startOptionsFortify()
-            fortifyStart = self.fortifyStart(startOptions)
-            endOptions = self.endOptionsFortify(fortifyStart)
-            fortifyEnd = self.fortifyEnd(endOptions)
-            movableTroops = fortifyStart.getNumOfTroops() - 1
-            troopCount = self.fortifyTroopCount(movableTroops)
-            fortifyStart.removeTroops(troopCount)
-            fortifyEnd.addTroops(troopCount)
+        startOptions = self.startOptionsFortify()
+        fortifyStart = self.fortifyStart(startOptions)
+        endOptions = self.endOptionsFortify(fortifyStart)
+        fortifyEnd = self.fortifyEnd(endOptions)
+        movableTroops = fortifyStart.getNumOfTroops() - 1
+        troopCount = self.fortifyTroopCount(movableTroops)
+        fortifyStart.removeTroops(troopCount)
+        fortifyEnd.addTroops(troopCount)
             
 
 
@@ -833,8 +820,12 @@ class Player:
             name = country.getName()
             troops = str(country.getNumOfTroops())
             countriesStr = countriesStr + "\t" + name + ": " + troops + "\n"
-        return"Player: %s \nNumber: %s \nTotal troops: %d \nCountries occupied: \n%s" % \
-               (self.__name, self.__number, self.getTotalTroops(), countriesStr)
+        cards = ""
+        for card in self.getCards():
+            cards.append(str(cards))
+            cards.append(" ")
+        return"Player: %s \nNumber: %s \nTotal troops: %d \nCountries occupied: \n%s\nCards Holding: %s" % \
+               (self.__name, self.__number, self.getTotalTroops(), countriesStr, cards)
 
 
 
@@ -950,11 +941,16 @@ def fixedGame(game):
                         game.removePlayer(player)
                     else:
                         player.draftFixed()
+                        numCountriesOccupiedStart = len(player.getCountriesOccupied())
                         attackBool = attackDecision()
                         while attackBool:  
                             player.attack(game)
                             attackBool = attackDecision()
-                        player.fortify()
+                        numCountriesOccupiedEnd = len(player.getCountriesOccupied())
+                        if numCountriesOccupiedEnd > numCountriesOccupiedStart:
+                            player.addCard()
+                        if fortifyDecision():
+                            player.fortify()
                 game.addTurn()
 
 #Play the progressive game to completion
@@ -972,17 +968,21 @@ def progressiveGame(game):
                     else:
                         player.draftProgressive(game)
                         print("draft done")
+                        numCountriesOccupiedStart = len(player.getCountriesOccupied())
                         attackBool = attackDecision()
                         while attackBool:  
                             player.attack(game)
                             attackBool = attackDecision()
-                        player.fortify()
+                        numCountriesOccupiedEnd = len(player.getCountriesOccupied())
+                        if numCountriesOccupiedEnd > numCountriesOccupiedStart:
+                            player.addCard()
+                        if fortifyDecision():
+                            player.fortify()
                 game.addTurn()
 
 #Autogenerate the random game to completion or to 500 turns printing the board status every 100 turns
 def randomGame(game):
     while len(game.getPlayers()) > 1 and turn < 501:
-        
         #Each player plays turn
         players = game.getPlayers()
         for i in range(len(players)):
@@ -1000,6 +1000,7 @@ def randomGame(game):
             for player in players:
                 print(turn)
                 print(player)
+                
 def gameType():
     gameOption = input("What kind of game do you want to play? ('fixed', 'progressive' or 'random'): ")
     gameOptions = ['fixed', 'progressive', 'random']
