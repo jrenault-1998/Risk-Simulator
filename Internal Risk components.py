@@ -596,6 +596,11 @@ class Player:
                 for player in game.getPlayers():
                     if defenderName == player.getName():
                         player.removeCountry(defender)
+                        #Checks if defender dies
+                        if player.getTotalTroops() == 0:
+                            print(player)
+                            print("Player ", player.getName(), " Has Been Terminated From The Board!")
+                            game.removePlayer(player)
                         break
                     
                 ## Add country to our list
@@ -897,24 +902,17 @@ class Country:
 
 #Asks if player wants to fortify
 def fortifyDecision():
-    string = "Do you want to fortify any troops? (0 for no, 1 for yes): "
-    answer = input(string)
-    if answer.isdigit():
-        answer = int(answer)
-        if answer == 0 or answer == 1:
-            return bool(answer)
-        else:
-            print("This is not an acceptable number")
-            return fortifyDecision()
-    else:
-        print("Please choose a number")
-        return fortifyDecision()
+    answer = input("Do you want to fortify any troops? (0 for no, 1 for yes): ")
+    return decision(answer)
 
     
 #Asks if player wants to attack
 def attackDecision():
-    string = "Do you want to attack a country? (0 for no, 1 for yes): "
-    answer = input(string)
+    answer = input("Do you want to attack a country? (0 for no, 1 for yes): ")
+    return decision(answer)
+
+#Checks to see that the decision was a boolean
+def decision(answer):
     if answer.isdigit():
         answer = int(answer)
         if answer == 0 or answer == 1:
@@ -930,16 +928,12 @@ def attackDecision():
 #Play the fixed game to completion
 def fixedGame(game):
     while len(game.getPlayers()) > 1:
-                
                 #Each player plays turn
                 players = game.getPlayers()
                 for i in range(len(players)):
-                    player = players[i]
-                    if not player.isAlive():
-                        print(player)
-                        print("Player ", player.getName(), " Has Been Terminated From The Board!")
-                        game.removePlayer(player)
-                    else:
+                    #Insures that a player who dies does not still play this turn
+                    if len(game.getPlayers()) > i:
+                        player = players[i]
                         player.draftFixed()
                         numCountriesOccupiedStart = len(player.getCountriesOccupied())
                         attackBool = attackDecision()
@@ -980,30 +974,10 @@ def progressiveGame(game):
                             player.fortify()
                 game.addTurn()
 
-#Autogenerate the random game to completion or to 500 turns printing the board status every 100 turns
-def randomGame(game):
-    while len(game.getPlayers()) > 1 and turn < 501:
-        #Each player plays turn
-        players = game.getPlayers()
-        for i in range(len(players)):
-            player = players[i]
-            if not player.isAlive():
-                print(player)
-                print("Player ", player.getName(), " Has Been Terminated From The Board!")
-                game.removePlayer(player)
-            else:
-                countryDrafted = player.draftRandom()
-                player.attackRandom(countryDrafted)
-                ## player.fortifyRandom()
-        game.addTurn()
-        if turn in [100,200,300,400,500]:
-            for player in players:
-                print(turn)
-                print(player)
                 
 def gameType():
-    gameOption = input("What kind of game do you want to play? ('fixed', 'progressive' or 'random'): ")
-    gameOptions = ['fixed', 'progressive', 'random']
+    gameOption = input("What kind of game do you want to play? ('fixed', 'progressive'): ")
+    gameOptions = ['fixed', 'progressive']
     if gameOption in gameOptions:
         return gameOption
     else:
@@ -1011,7 +985,6 @@ def gameType():
         return gameType()
     
 def main():
-    # Random autogenerates moves and uses progressive cards
     print("Welcome to Risk by Joshua Renault")
     gameChoice = gameType()
     game = Game(gameChoice)
@@ -1024,12 +997,4 @@ def main():
     elif gameChoice == gameOptions[1]: 
         fixedGame(game)
 
-    elif gameChoice == gameOptions[2]: 
-        randomGame(game)
-
-
 main()
-
-
-
-
