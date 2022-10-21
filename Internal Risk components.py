@@ -184,7 +184,7 @@ class Game:
             name = input("What is the name of player " + playerNumber + "? ")
             self.__players.append(Player(name, []))
 
-    #Generates a set of countries for each player
+    #Generates a set of countries for each player randomly
     def initCountries(self):
         board = self.getBoard()
         for i in range(len(board)):
@@ -195,7 +195,7 @@ class Game:
             country.setPlayerName(player.getName())
             player.addCountry(country)
             
-    #Adds remaining troops to each Players' countries
+    #Adds remaining troops to each Players' countries randomly
     def addLeftoverTroops(self, troopCount):
         players = self.getPlayers()
         for i in range(len(players)):
@@ -511,20 +511,20 @@ class Player:
     #Takes in an occupied Country and returns list of invadable Countries
     def invadableCountries(self, country):
         occupiedCountryNames = self.getOccupiedCountryNames()
-        nearbyCountries = country.getNearbyCountryNames()
+        nearbyCountries = country.getNearbyCountryNames().copy()
         for countryName in nearbyCountries:
             if countryName in occupiedCountryNames:
                 nearbyCountries.remove(countryName)
         return nearbyCountries
 
 
-    def attackRandom(self, attackingCountry):
-        options = self.invadableCountries(attackingCountry)
-        if len(options) > 0:
-            index = random.randint(0, (len(options)-1))
-            defender = options[index]
-            self.blitz(attackingCountry, defender)
-            ##Else, don't attack
+##    def attackRandom(self, attackingCountry):
+##        options = self.invadableCountries(attackingCountry)
+##        if len(options) > 0:
+##            index = random.randint(0, (len(options)-1))
+##            defender = options[index]
+##            self.blitz(attackingCountry, defender)
+##            ##Else, don't attack
 
             
     #Asks for a country name from a list and returns the country
@@ -535,15 +535,16 @@ class Player:
         optionNames = []
         for country in options:
             optionNames.append(country.getName())
-        if countryName in optionNames:
-            return self.findCountry(countryName)[1]         #This is a possible issue which stems from findCountry being a weird fcn returning a list
+        result = self.findCountry(countryName)
+        if result[0]:
+            return result[1] 
         else:
             print("That is not an option, please try again")
             return self.attacker(options)
 
             
     def defender(self, attacker, game):
-        options = attacker.getNearbyCountryNames()
+        options = attacker.getNearbyCountryNames().copy()
         owned = self.getOccupiedCountryNames()
         for name in options:
             if name in owned:
@@ -689,24 +690,24 @@ class Player:
     #Runs the attack sequence by generating a list of Countries a Player can attack from
     #Calls functions to select the attacking Country and the defending Country
     def attack(self, game):
-        options = self.getCountriesOccupied()
+        options = self.getCountriesOccupied().copy()
         for country in options:
             if country.getNumOfTroops() == 1:
-                options.remove(country)
+                options.remove(country)  
             else:
-                nearby = country.getNearbyCountryNames()
+                nearby = country.getNearbyCountryNames().copy()
                 owned = self.getOccupiedCountryNames()
                 for name in nearby:
                     if name in owned:
                         nearby.remove(name)
                 if len(nearby) == 0:
-                    options.remove(country)
+                    options.remove(country)   
         if len(options) == 0:
             print("You can't attack since you have no accessible troops")
         else:    
             attacker = self.attacker(options)
             defender = self.defender(attacker, game)
-            #Call rollDecision()
+            #Call rollDecision() to either slow roll or blitz (once written)
             self.blitz(attacker, defender, game)
 
 ###  Fortify Functions  ###
