@@ -546,9 +546,12 @@ class Player:
     def defender(self, attacker, game):
         options = attacker.getNearbyCountryNames().copy()
         owned = self.getOccupiedCountryNames()
+        print(options)
+        print(owned)
         for name in options:
             if name in owned:
                 options.remove(name)
+        print(options)
         print("Here are your options for who to attack: ", options)
         defenderName = input("Who do you want to attack? ")
         if defenderName in options:
@@ -701,7 +704,8 @@ class Player:
                     if name in owned:
                         nearby.remove(name)
                 if len(nearby) == 0:
-                    options.remove(country)   
+                    options.remove(country)
+        self.printCountryNames(options)
         if len(options) == 0:
             print("You can't attack since you have no accessible troops")
         else:    
